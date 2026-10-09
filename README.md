@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Werkstattregister Hamburg
 
-## Getting Started
+Werkstattsuche für Oldtimer in Hamburg: Filterbar nach Marke und Gewerk, mit
+Selbsteintrag-Formular für neue Werkstätten. Erster Baustein der geplanten
+Oldtimer-Plattform (siehe weitere Features: Zubehörmarkt, Werbung,
+Inserats-Bündelung, Gutachter-Buchung, Ersatzteile/3D-Druck).
 
-First, run the development server:
+## Stack
+
+- [Next.js 16](https://nextjs.org/) (App Router, TypeScript, Tailwind CSS v4)
+- [Supabase](https://supabase.com/) (Postgres-Datenbank, öffentlicher Lese-/beschränkter Schreibzugriff über Row Level Security)
+- [Vitest](https://vitest.dev/) für Unit-Tests
+- Deployment: [Vercel](https://vercel.com/)
+
+Die App funktioniert auch **ohne** Supabase-Anbindung (z. B. lokal beim ersten
+Ausprobieren): Sie zeigt dann automatisch die 17 recherchierten Werkstätten aus
+`src/data/seed-workshops.ts` an und markiert sich selbst als Demo-Modus. Das
+Selbsteintrag-Formular funktioniert erst, sobald Supabase eingerichtet ist.
+
+## 1. Lokal starten
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Öffnet auf http://localhost:3000 — läuft sofort im Demo-Modus mit den
+statischen Seed-Daten.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test        # Unit-Tests (Filterlogik)
+npm run build   # Produktions-Build
+npm run lint    # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 2. Supabase-Projekt einrichten (damit jeder Einträge vorschlagen kann)
 
-## Learn More
+1. Auf [supabase.com](https://supabase.com) kostenlos einen Account anlegen
+   und ein neues Projekt erstellen (Name z. B. `werkstattregister-hamburg`).
+2. Im Projekt unter **SQL Editor** → **New query** den Inhalt von
+   [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
+   einfügen und ausführen. Das legt die `workshops`-Tabelle inkl.
+   Row-Level-Security an (jeder darf lesen, jeder darf neue Einträge nur als
+   `pending` einreichen — niemand kann sich selbst verifizieren).
+3. Danach den Inhalt von [`supabase/seed.sql`](supabase/seed.sql) ausführen,
+   um die 17 recherchierten Werkstätten einzuspielen (`status = verified`).
+4. Unter **Project Settings → API** die **Project URL** und den
+   **`anon` public key** kopieren.
+5. Lokal eine `.env.local` Datei anlegen (siehe `.env.example`):
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   Der `anon`-Key ist bewusst für den Browser gedacht (daher
+   `NEXT_PUBLIC_`-Präfix) — der Schutz läuft über die RLS-Policy, nicht über
+   Geheimhaltung dieses Keys.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. Neu starten (`npm run dev`) — die Seite lädt jetzt live aus Supabase statt
+   aus den Seed-Daten.
 
-## Deploy on Vercel
+### Neue Einträge freischalten
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Einreichungen aus dem Formular landen mit `status = 'pending'` und werden auf
+der Seite als „Neu · ungeprüft" angezeigt. Um einen Eintrag als geprüft zu
+markieren: im Supabase-Dashboard unter **Table Editor → workshops** die Zeile
+öffnen und `status` auf `verified` setzen. Es gibt bewusst keinen
+Schreibzugriff dafür über die App selbst (nur du als Projekt-Owner kannst das
+im Dashboard).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 3. Deployment auf Vercel
+
+1. Repo auf GitHub pushen (siehe unten).
+2. Auf [vercel.com](https://vercel.com) mit GitHub einloggen → **Add New
+   Project** → dieses Repo auswählen.
+3. Unter **Environment Variables** die beiden Werte aus Schritt 2.5
+   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) eintragen.
+4. Deploy. Jeder Push auf den `main`-Branch löst danach automatisch ein neues
+   Deployment aus.
+
+## 4. GitHub
+
+```bash
+git remote add origin <URL deines leeren GitHub-Repos>
+git branch -M main
+git push -u origin main
+```
+
+## Datenqualität der Seed-Daten
+
+Vor dem Live-Gang kurz gegenchecken:
+
+- **CARCLASSICA CMP GmbH**: In den Quellen gab es zwei widersprüchliche
+  Adressangaben.
+- **Fernandes Oldtimertechnik GmbH**: Zwei widersprüchliche Telefonnummern
+  gefunden.
+- **Hallier Classic Cars, Eberhard Thiesen, Zukowsky Classic Cars**: Nur als
+  Händler bestätigt, Werkstatt-/Reparaturservice nicht verifiziert (im
+  `hinweis`-Feld entsprechend markiert).
+
+## Projektstruktur
+
+```
+src/
+  app/                 Next.js App Router (layout, page, globals.css)
+  components/          WorkshopExplorer, WorkshopCard, SelfEntryForm
+  lib/                 types, Supabase-Client, Filterlogik (+ Tests), Datenzugriff
+  data/                Statische Seed-/Fallback-Werkstätten
+supabase/
+  migrations/0001_init.sql   Schema + Row Level Security
+  seed.sql                   Die 17 recherchierten Werkstätten
+```

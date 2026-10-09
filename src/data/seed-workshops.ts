@@ -1,0 +1,27 @@
+import type { Workshop } from "@/lib/types";
+
+/**
+ * Fallback-Datensatz: die 17 recherchierten Hamburger Oldtimer-Werkstätten.
+ * Wird nur verwendet, wenn Supabase noch nicht konfiguriert ist (lokale
+ * Entwicklung ohne .env.local) oder die Abfrage fehlschlägt — in Produktion
+ * kommen die Daten aus der `workshops`-Tabelle (siehe supabase/seed.sql).
+ */
+export const SEED_WORKSHOPS: Workshop[] = [
+  { id: "w1", name: "Mirbach & Seemann GmbH", strasse: "Osterbrooksweg 62", plz: "22869", ort: "Schenefeld", telefon: "040 55503839", website: "mirbach-seemann.de", marken: ["Mercedes-Benz"], gewerke: ["Karosserie", "Lackierung", "Motor", "Sattlerei / Interieur", "Restaurierung komplett"], hinweis: "", status: "verified" },
+  { id: "w2", name: "CarMania GmbH", strasse: "Maimoorweg 60a", plz: "22179", ort: "Hamburg", telefon: "", website: "", marken: ["US-Cars", "Mercedes-Benz", "Jaguar / Britisch"], gewerke: ["Restaurierung komplett", "Ersatzteile / Zubehör", "Karosserie"], hinweis: "", status: "verified" },
+  { id: "w3", name: "Route 66 Borrmann Motors KG", strasse: "Kieler Straße 271", plz: "22525", ort: "Hamburg", telefon: "040 541095", website: "route66-hh.de", marken: ["US-Cars"], gewerke: ["Karosserie", "Elektrik", "Sattlerei / Interieur", "Motor"], hinweis: "", status: "verified" },
+  { id: "w4", name: "Fernandes Oldtimertechnik GmbH", strasse: "Wilhelm-Stein-Weg 20", plz: "22339", ort: "Hamburg (Hummelsbüttel)", telefon: "040 52731497", website: "", marken: ["Alfa Romeo / Italienisch", "Jaguar / Britisch"], gewerke: ["Restaurierung komplett", "Ersatzteile / Zubehör"], hinweis: "", status: "verified" },
+  { id: "w5", name: "Arnst Auto-Technik GmbH", strasse: "Schwarzerweg 9", plz: "20099", ort: "Hamburg", telefon: "040 498894", website: "", marken: ["Alfa Romeo / Italienisch"], gewerke: ["Elektrik"], hinweis: "", status: "verified" },
+  { id: "w6", name: "9elf-Hamburg GmbH & Co. KG", strasse: "Nedderfeld 23", plz: "22529", ort: "Hamburg", telefon: "040 87939291", website: "9elf-hamburg.de", marken: ["Porsche"], gewerke: ["Motor", "Restaurierung komplett", "Handel"], hinweis: "", status: "verified" },
+  { id: "w7", name: "VOSSWERK GmbH – Oldtimer & Automobilwerkstatt", strasse: "Pinneberger Chaussee 7", plz: "25436", ort: "Moorrege", telefon: "04122 810315", website: "vosswerk.de", marken: ["Alle Marken"], gewerke: ["Karosserie", "Motor", "Sattlerei / Interieur", "Lackierung", "Restaurierung komplett"], hinweis: "", status: "verified" },
+  { id: "w8", name: "Auto-Schultz GmbH (CARSPIRIT)", strasse: "Niedergeorgswerder Deich 97", plz: "21109", ort: "Hamburg", telefon: "040 3117150", website: "auto-schultz.de", marken: ["Toyota", "Alle Marken"], gewerke: ["Karosserie"], hinweis: "", status: "verified" },
+  { id: "w9", name: "Armin Leppek Auto-Service", strasse: "Harderweg 16", plz: "22549", ort: "Hamburg", telefon: "040 22757573", website: "armin-leppek.de", marken: ["Porsche"], gewerke: ["Motor"], hinweis: "", status: "verified" },
+  { id: "w10", name: "Mikes Garage", strasse: "Havighorster Weg 14", plz: "21031", ort: "Hamburg", telefon: "", website: "", marken: ["Alle Marken", "Mercedes-Benz"], gewerke: ["Handel"], hinweis: "", status: "verified" },
+  { id: "w11", name: "Hallier Classic Cars GmbH", strasse: "Gut Stellmoor 2", plz: "22926", ort: "Ahrensburg", telefon: "", website: "", marken: ["Alle Marken", "Jaguar / Britisch", "Porsche"], gewerke: ["Handel"], hinweis: "Nur als Händler bestätigt, Werkstattservice nicht verifiziert.", status: "verified" },
+  { id: "w12", name: "CARCLASSICA CMP GmbH", strasse: "Mühlenkamp 31", plz: "22303", ort: "Hamburg", telefon: "04191 9562090", website: "", marken: ["Alle Marken"], gewerke: ["Restaurierung komplett", "Handel"], hinweis: "", status: "verified" },
+  { id: "w13", name: "WEWO Classic Oldtimer Service GmbH", strasse: "Kroonstücken 7", plz: "22045", ort: "Hamburg (Tonndorf)", telefon: "040 38667177", website: "wewo-classic.de", marken: ["Alle Marken"], gewerke: ["Karosserie", "Motor", "Sattlerei / Interieur", "Lackierung", "Restaurierung komplett"], hinweis: "", status: "verified" },
+  { id: "w14", name: "Classic Manufactory Instruments", strasse: "Lemsahler Weg 23", plz: "22851", ort: "Norderstedt", telefon: "040 5407636", website: "cm-instruments.de", marken: ["Alle Marken"], gewerke: ["Ersatzteile / Zubehör"], hinweis: "", status: "verified" },
+  { id: "w15", name: "Eberhard Thiesen GmbH & Co. KG", strasse: "Tarpen 40, Halle 12", plz: "22419", ort: "Hamburg (Langenhorn)", telefon: "040 99998 6800", website: "eberhard-thiesen.de", marken: ["Porsche"], gewerke: ["Ersatzteile / Zubehör", "Handel"], hinweis: "Nur als Händler bestätigt, Werkstattservice nicht verifiziert.", status: "verified" },
+  { id: "w16", name: "M&M Manufaktur und Motor – Classic Garage", strasse: "Am Hehsel 40", plz: "22339", ort: "Hamburg", telefon: "040 46657036", website: "", marken: ["Alle Marken"], gewerke: ["Restaurierung komplett"], hinweis: "", status: "verified" },
+  { id: "w17", name: "Zukowsky Classic Cars GmbH", strasse: "Süntelstraße 20a", plz: "22457", ort: "Hamburg (Schnelsen)", telefon: "040 387605", website: "", marken: ["Alle Marken"], gewerke: ["Handel"], hinweis: "Nur als Händler bestätigt, Werkstattservice nicht verifiziert.", status: "verified" },
+];
