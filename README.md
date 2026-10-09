@@ -37,11 +37,15 @@ npm run lint    # ESLint
 
 1. Auf [supabase.com](https://supabase.com) kostenlos einen Account anlegen
    und ein neues Projekt erstellen (Name z. B. `werkstattregister-hamburg`).
-2. Im Projekt unter **SQL Editor** → **New query** den Inhalt von
+2. Im Projekt unter **SQL Editor** → **New query** nacheinander den Inhalt von
    [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
-   einfügen und ausführen. Das legt die `workshops`-Tabelle inkl.
+   und [`supabase/migrations/0002_reparaturfaelle.sql`](supabase/migrations/0002_reparaturfaelle.sql)
+   einfügen und ausführen. Das legt `workshops` und `reparaturfaelle` inkl.
    Row-Level-Security an (jeder darf lesen, jeder darf neue Einträge nur als
    `pending` einreichen — niemand kann sich selbst verifizieren).
+   `reparaturfaelle` ist reine Schema-Vorbereitung für die geplante
+   KI-Suche (siehe unten) — die aktuelle App liest/schreibt diese Tabelle
+   noch nicht.
 3. Danach den Inhalt von [`supabase/seed.sql`](supabase/seed.sql) ausführen,
    um die 17 recherchierten Werkstätten einzuspielen (`status = verified`).
 4. Unter **Project Settings → API** die **Project URL** und den
@@ -98,6 +102,28 @@ Vor dem Live-Gang kurz gegenchecken:
 - **Hallier Classic Cars, Eberhard Thiesen, Zukowsky Classic Cars**: Nur als
   Händler bestätigt, Werkstatt-/Reparaturservice nicht verifiziert (im
   `hinweis`-Feld entsprechend markiert).
+
+## Geplant: KI-Suche "welche Werkstatt kennt dieses Problem?"
+
+Phase 2 (noch nicht gebaut): Nutzer beschreibt ein Problem in natürlicher
+Sprache, eine KI gleicht es per Embedding-Ähnlichkeitssuche gegen
+gespeicherte Reparaturfälle ab und schlägt eine Werkstatt vor, die das
+Problem schonmal behandelt hat. Die Tabelle `reparaturfaelle`
+([`supabase/migrations/0002_reparaturfaelle.sql`](supabase/migrations/0002_reparaturfaelle.sql))
+ist dafür schon angelegt, bewusst noch ohne Embedding-Spalte/`pgvector` —
+die kommt erst, wenn das Embedding-Modell feststeht (eigene Migration 0003).
+
+Wichtiger Kontext aus der Recherche zum bestehenden Markt: etablierte
+Werkstattsoftware (Werbas/KSR, easyWerkstatt, Catama, Loco-Soft u. a.,
+international Shopmonkey/Tekmetric/AutoLeap) deckt Fahrzeug-/Kundenakte mit
+Reparaturhistorie längst ab — Werbas hatte sogar ein eigenes
+Oldtimer-Modul. Diese Daten liegen aber isoliert in der jeweiligen
+Werkstatt-Software und werden nicht werkstattübergreifend durchsucht. Der
+Mehrwert dieser App liegt also nicht im Ersetzen der internen
+Dokumentation, sondern in einer werkstattübergreifenden Wissensebene
+darüber — das spricht dafür, Werkstätten den Fall möglichst reibungslos
+hier eintragen zu lassen (oder später per Import aus ihrer bestehenden
+Software), statt eine Konkurrenz zu Werbas & Co. zu bauen.
 
 ## Projektstruktur
 
