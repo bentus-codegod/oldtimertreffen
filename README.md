@@ -43,7 +43,7 @@ Tailwind CSS v4) · [Supabase](https://supabase.com/) (Postgres + Row Level Secu
 Es werden bewusst keine externen Schriften geladen (System-Fonts) – der Build läuft
 auch in Netzwerk-eingeschränkten Umgebungen.
 
-Ohne Supabase-Anbindung läuft die Seite im **Vorschau-Modus** mit den 17 recherchierten
+Ohne Supabase-Anbindung läuft die Seite im **Vorschau-Modus** mit den recherchierten
 Werkstätten aus `src/data/seed-workshops.ts`; Formulare melden dann freundlich, dass
 noch keine Datenbank verbunden ist.
 
@@ -63,7 +63,7 @@ npm run build
    (eu-central-1)“ wählen** (Datenschutz).
 2. Im **SQL Editor** nacheinander ausführen:
    `supabase/migrations/0001_init.sql` → `0002_reparaturfaelle.sql` →
-   `0003_erfahrungsberichte.sql` → dann `supabase/seed.sql` (die 17 Werkstätten).
+   `0003_erfahrungsberichte.sql` → dann `supabase/seed.sql` und `supabase/seed-weitere.sql` (alle recherchierten Werkstätten).
 3. Unter **Project Settings → API** kopieren: *Project URL*, *anon public key* und
    *service_role key* (letzterer ist geheim!).
 4. `.env.local` anlegen (Vorlage: `.env.example`) und alle Werte eintragen.
@@ -94,6 +94,16 @@ npm run build
 - [ ] Prüfbereich einmal durchspielen: Werkstatt einreichen → in `/admin` freigeben →
       erscheint in der Liste.
 
+## Vorbereitet, noch nicht aktiv
+
+- **Route zur Werkstatt:** Auf jeder Detailseite und Karte gibt es „Route planen“ – ein Link
+  auf Google Maps mit der Werkstatt-Adresse als Ziel (`mapsHref` in
+  `src/components/ContactActions.tsx`). Es wird keine Karte eingebettet und kein Google-Skript
+  geladen, also auch kein Cookie-Banner nötig.
+- **Nur mit Anmeldung:** Geplant ist Supabase Auth (E-Mail-Link) mit einem Schalter
+  `NEXT_PUBLIC_LOGIN_REQUIRED`. Bis dahin bleibt die Seite offen; Einreichen und Berichte
+  laufen weiter über die Prüfung.
+
 ## Nächste Schritte (Ideen)
 
 - Rate-Limit pro IP für die Formulare (z. B. Upstash/Vercel KV) und optional Turnstile
@@ -117,5 +127,5 @@ src/
   data/                Seed-/Fallback-Werkstätten
 supabase/
   migrations/          0001 Schema+RLS · 0002 Reparaturfälle · 0003 Berichte+Prüfung
-  seed.sql             Die 17 recherchierten Werkstätten
+  seed.sql, seed-weitere.sql   Die recherchierten Werkstätten
 ```

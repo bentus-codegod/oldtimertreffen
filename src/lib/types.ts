@@ -43,6 +43,8 @@ export const GEWERKE = [
   "Restaurierung komplett",
   "Ersatzteile / Zubehör",
   "Handel",
+  "Wartung / Reparatur",
+  "Gutachten / HU",
 ] as const;
 
 export const REGIONEN = ["Hamburg", "Umland"] as const;

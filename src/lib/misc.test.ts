@@ -103,3 +103,17 @@ describe("admin session tokens", () => {
     expect(verifySessionToken(token, 2)).toBe(false);
   });
 });
+
+describe("seed-daten", () => {
+  it("hat eindeutige IDs, Slugs und nur bekannte Marken/Gewerke", async () => {
+    const { SEED_WORKSHOPS } = await import("@/data/seed-workshops");
+    const { MARKEN, GEWERKE } = await import("@/lib/types");
+    const withSlug = withSlugs(SEED_WORKSHOPS);
+    expect(new Set(withSlug.map((w) => w.id)).size).toBe(withSlug.length);
+    expect(new Set(withSlug.map((w) => w.slug)).size).toBe(withSlug.length);
+    for (const w of SEED_WORKSHOPS) {
+      for (const m of w.marken) expect(MARKEN as readonly string[]).toContain(m);
+      for (const g of w.gewerke) expect(GEWERKE as readonly string[]).toContain(g);
+    }
+  });
+});
