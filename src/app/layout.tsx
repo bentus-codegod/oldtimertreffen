@@ -7,7 +7,7 @@ import "./globals.css";
 // aus sorgfältig gewählten System-Font-Stacks (siehe globals.css).
 
 export const metadata: Metadata = {
-  title: "Werkstattregister Hamburg",
+  title: "Blechliebe – Oldtimer-Werkstätten in Hamburg",
   description:
     "Werkstattsuche für Oldtimer in Hamburg mit Marken-/Gewerk-Filter und Selbsteintrag-Formular für neue Werkstätten.",
 };

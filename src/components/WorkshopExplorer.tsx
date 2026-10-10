@@ -33,7 +33,7 @@ export default function WorkshopExplorer({
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-10 sm:px-6">
       <header className="flex flex-col gap-4 rounded-lg border border-border bg-rail px-6 py-8 text-rail-fg">
         <span className="font-mono text-xs uppercase tracking-widest text-rail-fg/70">
-          Werkstattregister
+          Blechliebe · Werkstattfinder Hamburg
         </span>
         <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
           Wer schraubt an deinem Klassiker?

@@ -1,4 +1,4 @@
-# Werkstattregister Hamburg
+# Blechliebe — Werkstattfinder Hamburg
 
 Werkstattsuche für Oldtimer in Hamburg: Filterbar nach Marke und Gewerk, mit
 Selbsteintrag-Formular für neue Werkstätten. Erster Baustein der geplanten
@@ -36,7 +36,7 @@ npm run lint    # ESLint
 ## 2. Supabase-Projekt einrichten (damit jeder Einträge vorschlagen kann)
 
 1. Auf [supabase.com](https://supabase.com) kostenlos einen Account anlegen
-   und ein neues Projekt erstellen (Name z. B. `werkstattregister-hamburg`).
+   und ein neues Projekt erstellen (Name z. B. `blechliebe`).
 2. Im Projekt unter **SQL Editor** → **New query** nacheinander den Inhalt von
    [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
    und [`supabase/migrations/0002_reparaturfaelle.sql`](supabase/migrations/0002_reparaturfaelle.sql)
