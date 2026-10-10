@@ -1,100 +1,130 @@
 import { describe, expect, it } from "vitest";
-import { filterWorkshops, sortWorkshops, countByMarke } from "@/lib/filters";
+import {
+  availableMarken,
+  countByMarke,
+  filterWorkshops,
+  regionOf,
+  sortWorkshops,
+} from "@/lib/filters";
 import type { Workshop } from "@/lib/types";
 
-const base: Workshop[] = [
-  {
-    id: "1",
-    name: "Porsche Profis Hamburg",
+function make(partial: Partial<Workshop> & Pick<Workshop, "id" | "name">): Workshop {
+  return {
+    slug: partial.id,
     strasse: "Teststraße 1",
     plz: "20099",
     ort: "Hamburg",
     telefon: "",
     website: "",
-    marken: ["Porsche"],
-    gewerke: ["Motor"],
+    marken: [],
+    gewerke: [],
     hinweis: "",
     status: "verified",
-  },
-  {
-    id: "2",
-    name: "Mercedes Classics",
-    strasse: "Teststraße 2",
-    plz: "22525",
-    ort: "Hamburg",
-    telefon: "",
-    website: "",
-    marken: ["Mercedes-Benz"],
-    gewerke: ["Lackierung", "Karosserie"],
-    hinweis: "",
-    status: "verified",
-  },
-  {
-    id: "3",
-    name: "Allrounder Garage",
-    strasse: "Dorfstraße 5",
-    plz: "25436",
-    ort: "Moorrege",
-    telefon: "",
-    website: "",
-    marken: ["Alle Marken"],
-    gewerke: ["Motor", "Karosserie"],
-    hinweis: "",
-    status: "pending",
-  },
-];
+    ...partial,
+  };
+}
+
+const porsche = make({ id: "1", name: "Porsche Profis", marken: ["Porsche"], gewerke: ["Motor"] });
+const mercedes = make({
+  id: "2",
+  name: "Mercedes Classics",
+  ort: "Hamburg (Tonndorf)",
+  marken: ["Mercedes-Benz"],
+  gewerke: ["Lackierung", "Karosserie"],
+});
+const alle = make({
+  id: "3",
+  name: "Ärmel Allrounder",
+  ort: "Moorrege",
+  marken: ["Alle Marken"],
+  gewerke: ["Motor", "Elektrik"],
+});
+const all = [porsche, mercedes, alle];
+const none = { marke: "", gewerk: "", suche: "" };
 
 describe("filterWorkshops", () => {
-  it("gibt alle Werkstätten zurück, wenn kein Filter gesetzt ist", () => {
-    expect(filterWorkshops(base, { marke: "", gewerk: "", suche: "" })).toHaveLength(3);
+  it("returns everything without filters", () => {
+    expect(filterWorkshops(all, none)).toHaveLength(3);
   });
 
-  it("filtert nach Marke", () => {
-    const result = filterWorkshops(base, { marke: "Porsche", gewerk: "", suche: "" });
-    expect(result.map((w) => w.id)).toEqual(["1"]);
+  it("filters by marke and gewerk", () => {
+    expect(filterWorkshops(all, { ...none, marke: "Porsche" })).toEqual([porsche]);
+    expect(filterWorkshops(all, { ...none, gewerk: "Motor" }).map((w) => w.id)).toEqual(["1", "3"]);
+    expect(filterWorkshops(all, { ...none, marke: "Porsche", gewerk: "Elektrik" })).toEqual([]);
   });
 
-  it("filtert nach Gewerk", () => {
-    const result = filterWorkshops(base, { marke: "", gewerk: "Karosserie", suche: "" });
-    expect(result.map((w) => w.id).sort()).toEqual(["2", "3"]);
+  it("filters by region (Hamburg incl. Stadtteile vs. Umland)", () => {
+    expect(filterWorkshops(all, { ...none, region: "Hamburg" }).map((w) => w.id)).toEqual(["1", "2"]);
+    expect(filterWorkshops(all, { ...none, region: "Umland" })).toEqual([alle]);
   });
 
-  it("kombiniert Marke und Gewerk (UND-Verknüpfung)", () => {
-    const result = filterWorkshops(base, { marke: "Mercedes-Benz", gewerk: "Motor", suche: "" });
-    expect(result).toHaveLength(0);
+  it("matches free text case-insensitively across fields", () => {
+    expect(filterWorkshops(all, { ...none, suche: "moorrege" })).toEqual([alle]);
+    expect(filterWorkshops(all, { ...none, suche: "  PORSCHE " })).toEqual([porsche]);
   });
 
-  it("filtert per Freitextsuche über Name, Ort und PLZ", () => {
-    expect(filterWorkshops(base, { marke: "", gewerk: "", suche: "moorrege" })).toHaveLength(1);
-    expect(filterWorkshops(base, { marke: "", gewerk: "", suche: "22525" })).toHaveLength(1);
+  it("requires every search word (AND, any order)", () => {
+    expect(filterWorkshops(all, { ...none, suche: "motor porsche" })).toEqual([porsche]);
+    expect(filterWorkshops(all, { ...none, suche: "motor lackierung" })).toEqual([]);
   });
 
-  it("ist bei der Suche case-insensitive und trimmt Leerzeichen", () => {
-    const result = filterWorkshops(base, { marke: "", gewerk: "", suche: "  PORSCHE  " });
-    expect(result.map((w) => w.id)).toEqual(["1"]);
+  it("also searches the extra text (e.g. repair reports)", () => {
+    const extra = { "2": "W123 Vergaser überholt" };
+    expect(filterWorkshops(all, { ...none, suche: "vergaser w123" }, extra)).toEqual([mercedes]);
+    expect(filterWorkshops(all, { ...none, suche: "vergaser" })).toEqual([]);
   });
 
-  it("'Alle Marken' matcht nicht automatisch bei einer konkreten Markensuche", () => {
-    const result = filterWorkshops(base, { marke: "Porsche", gewerk: "", suche: "" });
-    expect(result.some((w) => w.id === "3")).toBe(false);
+  it("combines filters and search", () => {
+    expect(filterWorkshops(all, { marke: "Porsche", gewerk: "Motor", suche: "profis" })).toEqual([porsche]);
+  });
+});
+
+describe("regionOf", () => {
+  it("treats Hamburg districts as Hamburg and everything else as Umland", () => {
+    expect(regionOf({ ort: "Hamburg" })).toBe("Hamburg");
+    expect(regionOf({ ort: "Hamburg (Hummelsbüttel)" })).toBe("Hamburg");
+    expect(regionOf({ ort: "Norderstedt" })).toBe("Umland");
   });
 });
 
 describe("sortWorkshops", () => {
-  it("sortiert nach Ort dann Name (deutsche Sortierreihenfolge)", () => {
-    const sorted = sortWorkshops(base);
-    expect(sorted.map((w) => w.id)).toEqual(["2", "1", "3"]);
+  it("sorts by name with German collation (Ä next to A)", () => {
+    expect(sortWorkshops(all).map((w) => w.name)).toEqual([
+      "Ärmel Allrounder",
+      "Mercedes Classics",
+      "Porsche Profis",
+    ]);
   });
 
-  it("verändert das Original-Array nicht", () => {
-    const copy = [...base];
-    sortWorkshops(base);
-    expect(base).toEqual(copy);
+  it("sorts by rating, then name", () => {
+    const summaries = {
+      "1": { count: 1, average: 4, recommendPercent: 100 },
+      "2": { count: 2, average: 5, recommendPercent: 100 },
+    };
+    expect(sortWorkshops(all, "bewertung", summaries).map((w) => w.id)).toEqual(["2", "1", "3"]);
+  });
+
+  it("sorts by number of reports", () => {
+    const summaries = {
+      "3": { count: 7, average: 3, recommendPercent: 50 },
+      "1": { count: 2, average: 5, recommendPercent: 100 },
+    };
+    expect(sortWorkshops(all, "berichte", summaries).map((w) => w.id)).toEqual(["3", "1", "2"]);
+  });
+
+  it("does not mutate the input", () => {
+    const copy = [...all];
+    sortWorkshops(all, "name");
+    expect(all).toEqual(copy);
   });
 });
 
-describe("countByMarke", () => {
-  it("zählt eindeutige Marken ohne 'Alle Marken'", () => {
-    expect(countByMarke(base)).toBe(2);
+describe("marken helpers", () => {
+  it("counts concrete brands without 'Alle Marken'", () => {
+    expect(countByMarke(all)).toBe(2);
+  });
+
+  it("lists available marken alphabetically with 'Alle Marken' last", () => {
+    expect(availableMarken(all)).toEqual(["Mercedes-Benz", "Porsche", "Alle Marken"]);
   });
 });

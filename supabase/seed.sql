@@ -1,4 +1,4 @@
--- Werkstattregister Hamburg — Seed-Daten
+-- Oldtimer Stammtisch — Seed-Daten
 -- Die 17 recherchierten Werkstätten aus der ersten Recherche-Runde.
 -- Nach der Migration (0001_init.sql) einmal im Supabase SQL-Editor ausführen.
 --

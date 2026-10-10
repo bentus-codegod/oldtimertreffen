@@ -1,4 +1,4 @@
--- Werkstattregister Hamburg — initial schema
+-- Oldtimer Stammtisch — initial schema
 -- Run this once in the Supabase SQL editor (or via `supabase db push`).
 
 create extension if not exists pgcrypto;

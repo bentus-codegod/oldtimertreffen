@@ -1,4 +1,4 @@
--- Werkstattregister Hamburg — Schema-Vorbereitung für die geplante KI-Suche
+-- Oldtimer Stammtisch — Schema-Vorbereitung für die geplante KI-Suche
 -- ("Welche Werkstatt hat dieses Problem schonmal behandelt?").
 --
 -- Diese Migration legt nur die Tabelle für Reparaturfälle an — noch OHNE

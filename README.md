@@ -1,139 +1,121 @@
-# Blechliebe — Werkstattfinder Hamburg
+# Oldtimer Stammtisch
 
-Werkstattsuche für Oldtimer in Hamburg: Filterbar nach Marke und Gewerk, mit
-Selbsteintrag-Formular für neue Werkstätten. Erster Baustein der geplanten
-Oldtimer-Plattform (siehe weitere Features: Zubehörmarkt, Werbung,
-Inserats-Bündelung, Gutachter-Buchung, Ersatzteile/3D-Druck).
+Werkstattfinder für Oldtimer in Hamburg und Umland – mit Erfahrungsberichten von
+Besitzern, Selbsteintrag für Werkstätten und **Prüfung vor jeder Veröffentlichung**.
+Erster Baustein einer größeren Oldtimer-Plattform (Treffen, Rallyes, Stellplätze,
+Marktplatz – siehe „Bald am Stammtisch“ auf der Startseite).
+
+Der Markenname steht zentral in [`src/lib/site.ts`](src/lib/site.ts) – wer ihn ändert,
+ändert die ganze Seite (Header, Titel, Texte, Logo).
+
+## Was die Seite kann
+
+- **Startseite** mit Suche, Marken-Schnellwahl, neuesten Berichten, Ausblick
+- **Verzeichnis** `/werkstaetten`: alle Werkstätten; Filter nach Marke, Leistung, Gebiet
+  (Hamburg/Umland); Freitext durchsucht auch die Erfahrungsberichte („Vergaser W123“);
+  Deep-Links wie `/werkstaetten?marke=Porsche`
+- **Werkstatt-Detailseite** `/werkstatt/<name-ort>`: Kontakt-Buttons (Anrufen, Route,
+  Website), Marken, Leistungen, Bewertungsschnitt, Erfahrungsberichte, Berichtsformular,
+  Schema.org-Daten für Google
+- **Werkstatt eintragen** `/eintragen`: Formular mit serverseitiger Validierung
+- **Erfahrungsbericht**: Fahrzeug (Marke/Modell/Baujahr), Problem, was gemacht wurde,
+  Gesamteindruck, Sterne, Kosten, Empfehlung
+- **Prüfbereich** `/admin`: neue Werkstätten und Berichte freigeben oder ablehnen
+- Impressum, Datenschutz, Sitemap, robots.txt, 404-Seite, Dunkelmodus, große Schrift
+
+## So funktioniert die Prüfung
+
+Alles, was Besucher einreichen, landet mit `status = 'pending'` in der Datenbank. Die
+Row-Level-Security-Policies erzwingen das (niemand kann sich selbst freischalten) und
+lassen die Öffentlichkeit **nur `verified`-Zeilen lesen**. Freigeben oder Ablehnen geht
+im Prüfbereich `/admin` (Passwort) – oder direkt im Supabase Table Editor
+(`status` auf `verified` setzen).
+
+Spam-Schutz: unsichtbares Honeypot-Feld, serverseitige Validierung mit Längenlimits,
+Pflicht-Bestätigung, harte Längen-Checks zusätzlich in der Datenbank. Ein Rate-Limit pro
+IP gibt es noch nicht (siehe „Nächste Schritte“).
 
 ## Stack
 
-- [Next.js 16](https://nextjs.org/) (App Router, TypeScript, Tailwind CSS v4)
-- [Supabase](https://supabase.com/) (Postgres-Datenbank, öffentlicher Lese-/beschränkter Schreibzugriff über Row Level Security)
-- [Vitest](https://vitest.dev/) für Unit-Tests
-- Deployment: [Vercel](https://vercel.com/)
+[Next.js 16](https://nextjs.org/) (App Router, Cache Components, TypeScript,
+Tailwind CSS v4) · [Supabase](https://supabase.com/) (Postgres + Row Level Security) ·
+[Vitest](https://vitest.dev/) · Deployment auf [Vercel](https://vercel.com/).
+Es werden bewusst keine externen Schriften geladen (System-Fonts) – der Build läuft
+auch in Netzwerk-eingeschränkten Umgebungen.
 
-Die App funktioniert auch **ohne** Supabase-Anbindung (z. B. lokal beim ersten
-Ausprobieren): Sie zeigt dann automatisch die 17 recherchierten Werkstätten aus
-`src/data/seed-workshops.ts` an und markiert sich selbst als Demo-Modus. Das
-Selbsteintrag-Formular funktioniert erst, sobald Supabase eingerichtet ist.
+Ohne Supabase-Anbindung läuft die Seite im **Vorschau-Modus** mit den 17 recherchierten
+Werkstätten aus `src/data/seed-workshops.ts`; Formulare melden dann freundlich, dass
+noch keine Datenbank verbunden ist.
 
 ## 1. Lokal starten
 
 ```bash
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
+npm test           # Unit-Tests (Filter, Validierung, Slugs, Admin-Session …)
+npm run lint
+npm run build
 ```
 
-Öffnet auf http://localhost:3000 — läuft sofort im Demo-Modus mit den
-statischen Seed-Daten.
+## 2. Supabase einrichten
 
-```bash
-npm test        # Unit-Tests (Filterlogik)
-npm run build   # Produktions-Build
-npm run lint    # ESLint
-```
+1. Auf [supabase.com](https://supabase.com) ein Projekt anlegen – **Region „Frankfurt
+   (eu-central-1)“ wählen** (Datenschutz).
+2. Im **SQL Editor** nacheinander ausführen:
+   `supabase/migrations/0001_init.sql` → `0002_reparaturfaelle.sql` →
+   `0003_erfahrungsberichte.sql` → dann `supabase/seed.sql` (die 17 Werkstätten).
+3. Unter **Project Settings → API** kopieren: *Project URL*, *anon public key* und
+   *service_role key* (letzterer ist geheim!).
+4. `.env.local` anlegen (Vorlage: `.env.example`) und alle Werte eintragen.
 
-## 2. Supabase-Projekt einrichten (damit jeder Einträge vorschlagen kann)
-
-1. Auf [supabase.com](https://supabase.com) kostenlos einen Account anlegen
-   und ein neues Projekt erstellen (Name z. B. `blechliebe`).
-2. Im Projekt unter **SQL Editor** → **New query** nacheinander den Inhalt von
-   [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql)
-   und [`supabase/migrations/0002_reparaturfaelle.sql`](supabase/migrations/0002_reparaturfaelle.sql)
-   einfügen und ausführen. Das legt `workshops` und `reparaturfaelle` inkl.
-   Row-Level-Security an (jeder darf lesen, jeder darf neue Einträge nur als
-   `pending` einreichen — niemand kann sich selbst verifizieren).
-   `reparaturfaelle` ist reine Schema-Vorbereitung für die geplante
-   KI-Suche (siehe unten) — die aktuelle App liest/schreibt diese Tabelle
-   noch nicht.
-3. Danach den Inhalt von [`supabase/seed.sql`](supabase/seed.sql) ausführen,
-   um die 17 recherchierten Werkstätten einzuspielen (`status = verified`).
-4. Unter **Project Settings → API** die **Project URL** und den
-   **`anon` public key** kopieren.
-5. Lokal eine `.env.local` Datei anlegen (siehe `.env.example`):
-
-   ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-   ```
-
-   Der `anon`-Key ist bewusst für den Browser gedacht (daher
-   `NEXT_PUBLIC_`-Präfix) — der Schutz läuft über die RLS-Policy, nicht über
-   Geheimhaltung dieses Keys.
-
-6. Neu starten (`npm run dev`) — die Seite lädt jetzt live aus Supabase statt
-   aus den Seed-Daten.
-
-### Neue Einträge freischalten
-
-Einreichungen aus dem Formular landen mit `status = 'pending'` und werden auf
-der Seite als „Neu · ungeprüft" angezeigt. Um einen Eintrag als geprüft zu
-markieren: im Supabase-Dashboard unter **Table Editor → workshops** die Zeile
-öffnen und `status` auf `verified` setzen. Es gibt bewusst keinen
-Schreibzugriff dafür über die App selbst (nur du als Projekt-Owner kannst das
-im Dashboard).
+> Wichtig: `0003` stellt die Lese-Policies um – danach sieht die Öffentlichkeit nur noch
+> geprüfte Einträge. Es muss also **nach** dem Seed laufen oder die Seed-Zeilen haben
+> bereits `status = 'verified'` (haben sie).
 
 ## 3. Deployment auf Vercel
 
-1. Repo auf GitHub pushen (siehe unten).
-2. Auf [vercel.com](https://vercel.com) mit GitHub einloggen → **Add New
-   Project** → dieses Repo auswählen.
-3. Unter **Environment Variables** die beiden Werte aus Schritt 2.5
-   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) eintragen.
-4. Deploy. Jeder Push auf den `main`-Branch löst danach automatisch ein neues
-   Deployment aus.
+1. Repo auf GitHub pushen, auf [vercel.com](https://vercel.com) **Add New Project** →
+   Repo wählen.
+2. Unter **Environment Variables** alle Werte aus `.env.example` eintragen.
+   `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` **nicht** mit
+   `NEXT_PUBLIC_` versehen.
+3. Deploy. Eigene Domain: Vercel → Settings → Domains; danach `NEXT_PUBLIC_SITE_URL`
+   auf die Domain setzen und neu deployen.
 
-## 4. GitHub
+## Vor dem Live-Gang
 
-```bash
-git remote add origin <URL deines leeren GitHub-Repos>
-git branch -M main
-git push -u origin main
-```
+- [ ] Impressum/Datenschutz-Angaben per Env setzen (Seiten warnen sichtbar, solange sie
+      fehlen) und die Texte einmal rechtlich prüfen lassen – sie sind eine solide
+      Vorlage, aber kein Rechtsrat.
+- [ ] Datenqualität der Seed-Daten gegenchecken: *CARCLASSICA CMP* (zwei widersprüchliche
+      Adressen) und *Fernandes Oldtimertechnik* (zwei Telefonnummern) sind auf der
+      Seite als „Kontaktdaten werden geprüft“ markiert; *Hallier*, *Eberhard Thiesen*,
+      *Zukowsky* sind nur als Händler bestätigt (ebenfalls gekennzeichnet).
+- [ ] Prüfbereich einmal durchspielen: Werkstatt einreichen → in `/admin` freigeben →
+      erscheint in der Liste.
 
-## Datenqualität der Seed-Daten
+## Nächste Schritte (Ideen)
 
-Vor dem Live-Gang kurz gegenchecken:
-
-- **CARCLASSICA CMP GmbH**: In den Quellen gab es zwei widersprüchliche
-  Adressangaben.
-- **Fernandes Oldtimertechnik GmbH**: Zwei widersprüchliche Telefonnummern
-  gefunden.
-- **Hallier Classic Cars, Eberhard Thiesen, Zukowsky Classic Cars**: Nur als
-  Händler bestätigt, Werkstatt-/Reparaturservice nicht verifiziert (im
-  `hinweis`-Feld entsprechend markiert).
-
-## Geplant: KI-Suche "welche Werkstatt kennt dieses Problem?"
-
-Phase 2 (noch nicht gebaut): Nutzer beschreibt ein Problem in natürlicher
-Sprache, eine KI gleicht es per Embedding-Ähnlichkeitssuche gegen
-gespeicherte Reparaturfälle ab und schlägt eine Werkstatt vor, die das
-Problem schonmal behandelt hat. Die Tabelle `reparaturfaelle`
-([`supabase/migrations/0002_reparaturfaelle.sql`](supabase/migrations/0002_reparaturfaelle.sql))
-ist dafür schon angelegt, bewusst noch ohne Embedding-Spalte/`pgvector` —
-die kommt erst, wenn das Embedding-Modell feststeht (eigene Migration 0003).
-
-Wichtiger Kontext aus der Recherche zum bestehenden Markt: etablierte
-Werkstattsoftware (Werbas/KSR, easyWerkstatt, Catama, Loco-Soft u. a.,
-international Shopmonkey/Tekmetric/AutoLeap) deckt Fahrzeug-/Kundenakte mit
-Reparaturhistorie längst ab — Werbas hatte sogar ein eigenes
-Oldtimer-Modul. Diese Daten liegen aber isoliert in der jeweiligen
-Werkstatt-Software und werden nicht werkstattübergreifend durchsucht. Der
-Mehrwert dieser App liegt also nicht im Ersetzen der internen
-Dokumentation, sondern in einer werkstattübergreifenden Wissensebene
-darüber — das spricht dafür, Werkstätten den Fall möglichst reibungslos
-hier eintragen zu lassen (oder später per Import aus ihrer bestehenden
-Software), statt eine Konkurrenz zu Werbas & Co. zu bauen.
+- Rate-Limit pro IP für die Formulare (z. B. Upstash/Vercel KV) und optional Turnstile
+- E-Mail-Benachrichtigung bei neuer Einreichung
+- Werkstatt „übernehmen“ (Betreiber pflegen ihr Profil selbst)
+- Korrektur-melden-Button pro Werkstatt
+- KI-Suche „Welche Werkstatt kennt dieses Problem?“: Die Tabelle `reparaturfaelle` ist
+  bereits die Wissensbasis; es fehlen Embeddings (`pgvector`, Migration 0004) und ein
+  Modell (Voyage AI für Embeddings, ein günstiges Claude-Modell für die Auswertung)
+- Treffen/Ausfahrten, Rallyes, Stellplätze, Marktplatz
 
 ## Projektstruktur
 
 ```
 src/
-  app/                 Next.js App Router (layout, page, globals.css)
-  components/          WorkshopExplorer, WorkshopCard, SelfEntryForm
-  lib/                 types, Supabase-Client, Filterlogik (+ Tests), Datenzugriff
-  data/                Statische Seed-/Fallback-Werkstätten
+  app/                 Seiten: Start, werkstaetten, werkstatt/[slug], eintragen,
+                       admin, impressum, datenschutz, sitemap, robots
+  components/          Karten, Formulare, Verzeichnis (Client), Logo, Header/Footer
+  lib/                 Typen, Filter, Validierung, Datenzugriff (gecacht), Slugs,
+                       Bewertungen, Admin-Login, Supabase-Clients (+ Tests)
+  data/                Seed-/Fallback-Werkstätten
 supabase/
-  migrations/0001_init.sql   Schema + Row Level Security
-  seed.sql                   Die 17 recherchierten Werkstätten
+  migrations/          0001 Schema+RLS · 0002 Reparaturfälle · 0003 Berichte+Prüfung
+  seed.sql             Die 17 recherchierten Werkstätten
 ```

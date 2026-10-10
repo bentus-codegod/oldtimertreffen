@@ -1,78 +1,68 @@
+import Link from "next/link";
+import Stars from "@/components/Stars";
+import type { ReviewSummary } from "@/lib/reviews";
 import type { Workshop } from "@/lib/types";
 
-function formatIndex(n: number): string {
-  return String(n).padStart(2, "0");
-}
+const MAX_MARKEN = 4;
 
 export default function WorkshopCard({
   workshop,
-  index,
+  summary,
 }: {
   workshop: Workshop;
-  index: number;
+  summary?: ReviewSummary;
 }) {
-  const isNeu = workshop.status === "pending";
+  const shownMarken = workshop.marken.slice(0, MAX_MARKEN);
+  const moreMarken = workshop.marken.length - shownMarken.length;
+  const hasReviews = Boolean(summary && summary.count > 0);
 
   return (
-    <article className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <span className="font-mono text-xs text-muted">{formatIndex(index)}</span>
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wide ${
-            isNeu
-              ? "bg-new/15 text-new"
-              : "bg-ok/15 text-ok"
-          }`}
-        >
-          {isNeu ? "Neu · ungeprüft" : "Recherchiert"}
-        </span>
+    <article className="card group relative flex flex-col gap-3 p-5 transition-shadow hover:shadow-md focus-within:shadow-md">
+      <div>
+        <h3 className="font-display text-2xl font-bold leading-tight">
+          <Link
+            href={`/werkstatt/${workshop.slug}`}
+            className="text-fg no-underline after:absolute after:inset-0 after:content-[''] group-hover:text-accent"
+          >
+            {workshop.name}
+          </Link>
+        </h3>
+        <p className="mt-1 text-base text-muted">
+          {workshop.strasse} · {workshop.plz} {workshop.ort}
+        </p>
       </div>
 
-      <h3 className="font-display text-lg font-medium leading-snug text-fg">
-        {workshop.name}
-      </h3>
+      <ul className="flex flex-wrap gap-2" aria-label="Marken">
+        {shownMarken.map((m) => (
+          <li key={m} className="chip">
+            {m}
+          </li>
+        ))}
+        {moreMarken > 0 ? <li className="chip">+{moreMarken}</li> : null}
+      </ul>
 
-      <p className="text-sm text-muted">
-        {workshop.strasse}
-        <br />
-        {workshop.plz} {workshop.ort}
+      <p className="text-base">
+        <span className="sr-only">Leistungen: </span>
+        {workshop.gewerke.join(" · ")}
       </p>
 
-      {(workshop.telefon || workshop.website) && (
-        <p className="font-mono text-xs text-muted">
-          {workshop.telefon && <span>{workshop.telefon}</span>}
-          {workshop.telefon && workshop.website && <span> · </span>}
-          {workshop.website && <span>{workshop.website}</span>}
-        </p>
-      )}
+      {workshop.hinweis ? (
+        <p className="rounded-md bg-warn/10 px-3 py-2 text-sm text-warn">{workshop.hinweis}</p>
+      ) : null}
 
-      <div className="flex flex-wrap gap-1.5">
-        {workshop.marken.map((m) => (
-          <span
-            key={m}
-            className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-xs text-fg"
-          >
-            {m}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {workshop.gewerke.map((g) => (
-          <span
-            key={g}
-            className="rounded-full bg-rail px-2 py-0.5 text-xs text-rail-fg"
-          >
-            {g}
-          </span>
-        ))}
-      </div>
-
-      {workshop.hinweis && (
-        <p className="border-t border-border pt-2 text-xs text-muted italic">
-          {workshop.hinweis}
-        </p>
-      )}
+      <p className="mt-auto flex items-center gap-2 pt-1 text-base">
+        {hasReviews && summary ? (
+          <>
+            <Stars value={summary.average} />
+            <span className="text-muted">
+              {summary.average.toLocaleString("de-DE")} · {summary.count}{" "}
+              {summary.count === 1 ? "Bericht" : "Berichte"}
+            </span>
+          </>
+        ) : (
+          <span className="text-muted">Noch keine Erfahrungsberichte</span>
+        )}
+      </p>
     </article>
   );
 }

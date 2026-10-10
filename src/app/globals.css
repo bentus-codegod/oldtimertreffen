@@ -1,34 +1,52 @@
 @import "tailwindcss";
 
+/*
+ * Farbwelt: Garage nach Feierabend – tiefes Rennsport-Grün, Messing/Bernstein
+ * als Akzent, warmes Papier als Fläche. Alle Farben sind Tokens; der Dunkelmodus
+ * überschreibt nur die Werte. Kontraste sind bewusst hoch gewählt (Zielgruppe
+ * 40–70, oft draußen/in der Garage am Handy).
+ */
 :root {
-  --bg: #eef0ea;
-  --surface: #ffffff;
-  --surface-2: #e4e7dd;
-  --fg: #17211b;
-  --muted: #5b6a60;
-  --border: #cbd1c2;
-  --accent: #c77a1f;
-  --accent-fg: #2a1200;
-  --rail: #1f3a2e;
-  --rail-fg: #f2f1e9;
-  --ok: #3d7a4e;
-  --new: #b2541d;
+  --bg: #efede4;
+  --surface: #fffefa;
+  --surface-2: #e5e2d4;
+  --fg: #16201a;
+  --muted: #4d5b52;
+  --border: #c2bfae;
+  --accent: #b86a12;
+  --accent-hover: #9a560a;
+  --accent-fg: #ffffff;
+  --rail: #1b362a;
+  --rail-fg: #f4f1e4;
+  --rail-muted: #b7c9bd;
+  --ok: #2f6e43;
+  --warn: #a0430f;
+  --star: #c98211;
+  --plate-bg: #fbfaf3;
+  --plate-fg: #101410;
+  --plate-eu: #1d3f94;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12201a;
-    --surface: #182821;
+    --bg: #101b15;
+    --surface: #17261f;
     --surface-2: #1d3128;
-    --fg: #ecf2ec;
-    --muted: #9fb3a6;
-    --border: #2d4439;
-    --accent: #e0933a;
-    --accent-fg: #20110400;
-    --rail: #0d1813;
-    --rail-fg: #ecf2ec;
-    --ok: #63b578;
-    --new: #e2824a;
+    --fg: #eef3ee;
+    --muted: #a9bcb0;
+    --border: #2f463a;
+    --accent: #e39a3f;
+    --accent-hover: #f0ad5a;
+    --accent-fg: #1c0f02;
+    --rail: #0a130e;
+    --rail-fg: #eef3ee;
+    --rail-muted: #93a99b;
+    --ok: #6fc184;
+    --warn: #ee9560;
+    --star: #f0b23e;
+    --plate-bg: #f1efe2;
+    --plate-fg: #101410;
+    --plate-eu: #2a52b8;
     color-scheme: dark;
   }
 }
@@ -41,25 +59,83 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
   --color-rail: var(--rail);
   --color-rail-fg: var(--rail-fg);
+  --color-rail-muted: var(--rail-muted);
   --color-ok: var(--ok);
-  --color-new: var(--new);
-  --font-display: "Futura PT", "Century Gothic", "URW Gothic", Futura, Avantgarde,
-    "Trebuchet MS", sans-serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono",
-    monospace;
+  --color-warn: var(--warn);
+  --color-star: var(--star);
+  --font-display: "Avenir Next Condensed", "Franklin Gothic Medium", "Arial Narrow",
+    "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Grundschrift etwas größer als üblich: 18 px statt 16 px. */
+html {
+  font-size: 112.5%;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
+  line-height: 1.6;
 }
 
 ::selection {
   background: var(--accent);
   color: var(--accent-fg);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* @utility statt @layer components: nur so lässt sich "btn" in den Varianten per @apply wiederverwenden. */
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-md border px-5 py-2.5 text-base font-semibold no-underline transition-colors;
+}
+
+@layer components {
+  .btn-primary {
+    @apply btn border-accent bg-accent text-accent-fg hover:bg-accent-hover hover:border-accent-hover;
+  }
+  .btn-outline {
+    @apply btn border-border bg-surface text-fg hover:border-accent hover:text-accent;
+  }
+  .btn-rail {
+    @apply btn border-rail-fg/40 bg-transparent text-rail-fg hover:bg-rail-fg/10;
+  }
+  .label {
+    @apply mb-1.5 block text-base font-semibold;
+  }
+  .hint {
+    @apply mt-1 text-sm text-muted;
+  }
+  .input {
+    @apply min-h-12 w-full rounded-md border border-border bg-surface px-3.5 py-2.5 text-base text-fg placeholder:text-muted/70;
+  }
+  .error-text {
+    @apply mt-1.5 text-sm font-medium text-warn;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full bg-surface-2 px-3 py-1 text-sm font-medium text-fg;
+  }
+  .card {
+    @apply rounded-lg border border-border bg-surface;
+  }
+  .kicker {
+    @apply font-mono text-xs font-semibold uppercase tracking-[0.18em];
+  }
 }
