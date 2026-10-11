@@ -85,6 +85,21 @@ export default function DatenschutzPage() {
           </p>
         </Section>
 
+        <Section title="Konto und Anmeldung">
+          <p>
+            Wenn Sie ein Konto anlegen, speichern wir Ihre E-Mail-Adresse und einen (sicher
+            gehashten) Passwort-Nachweis sowie – falls angegeben – einen Anzeigenamen bei unserem
+            Dienstleister Supabase. Die E-Mail-Adresse dient der Anmeldung, der Bestätigung und
+            wichtigen Benachrichtigungen zum Konto. Rechtsgrundlage ist die Erfüllung des
+            Nutzungsverhältnisses und Ihre Einwilligung (Art. 6 Abs. 1 lit. a und b DSGVO).
+          </p>
+          <p>
+            Erfahrungsberichte, die Sie als angemeldeter Nutzer schreiben, werden Ihrem Konto
+            zugeordnet und sofort veröffentlicht. Sie können Ihr Konto und Ihre Berichte jederzeit
+            löschen lassen – schreiben Sie uns dazu eine E-Mail.
+          </p>
+        </Section>
+
         <Section title="Ihre Rechte">
           <p>
             Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,

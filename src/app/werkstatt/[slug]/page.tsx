@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactActions from "@/components/ContactActions";
@@ -7,6 +8,7 @@ import ReviewCard from "@/components/ReviewCard";
 import ReviewForm from "@/components/ReviewForm";
 import Stars from "@/components/Stars";
 import { getReviews, getWorkshopBySlug, getWorkshops } from "@/lib/data";
+import { getCurrentUser } from "@/lib/auth";
 import { summarize } from "@/lib/reviews";
 import { SITE } from "@/lib/site";
 import type { Review, Workshop } from "@/lib/types";
@@ -119,7 +121,9 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
           Ihre Erfahrung teilen
         </h2>
         <div className="mt-4 max-w-3xl">
-          <ReviewForm workshopId={workshop.id} workshopName={workshop.name} />
+          <Suspense fallback={<div className="card h-40 animate-pulse" />}>
+            <WriteReviewSection workshopId={workshop.id} workshopName={workshop.name} slug={workshop.slug} />
+          </Suspense>
         </div>
       </section>
 
@@ -128,6 +132,37 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
         // "<" wird escaped, damit eingetragene Texte das Script-Tag nie schließen können.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(workshop, summary)).replace(/</g, "\\u003c") }}
       />
+    </div>
+  );
+}
+
+async function WriteReviewSection({
+  workshopId,
+  workshopName,
+  slug,
+}: {
+  workshopId: string;
+  workshopName: string;
+  slug: string;
+}) {
+  const user = await getCurrentUser();
+  if (user) {
+    return <ReviewForm workshopId={workshopId} workshopName={workshopName} />;
+  }
+  return (
+    <div className="card flex flex-col items-start gap-4 p-6">
+      <p className="text-lg">
+        Um einen Erfahrungsbericht zu schreiben, melden Sie sich bitte kurz an – so bleiben die
+        Berichte echt und nachvollziehbar. Zum Stöbern brauchen Sie kein Konto.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Link href={`/anmelden?next=/werkstatt/${slug}`} className="btn-primary">
+          Anmelden
+        </Link>
+        <Link href="/registrieren" className="btn-outline">
+          Konto erstellen
+        </Link>
+      </div>
     </div>
   );
 }
@@ -147,7 +182,7 @@ function ReviewsList({ reviews }: { reviews: Review[] }) {
     <ul className="mt-5 flex flex-col gap-5">
       {reviews.map((review) => (
         <li key={review.id}>
-          <ReviewCard review={review} />
+          <ReviewCard review={review} reportable />
         </li>
       ))}
     </ul>

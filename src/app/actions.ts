@@ -1,6 +1,9 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { isBot, validateReview, validateWorkshop, type FieldErrors } from "@/lib/validation";
 
 export interface FormState {
@@ -74,32 +77,72 @@ export async function submitWorkshopAction(_prev: FormState, formData: FormData)
   };
 }
 
-/** Nimmt einen Erfahrungsbericht entgegen (ebenfalls erst nach Prüfung sichtbar). */
+/**
+ * Nimmt einen Erfahrungsbericht entgegen. Nur für eingeloggte Nutzer; der
+ * Bericht wird dem Konto zugeordnet (user_id) und automatisch veröffentlicht
+ * (status='verified'). Missbrauch wird über den „Melden“-Button + Löschung
+ * abgefangen (Notice-and-Takedown), nicht mehr über manuelle Vorab-Freigabe.
+ */
 export async function submitReviewAction(_prev: FormState, formData: FormData): Promise<FormState> {
   if (isBot(formData)) return { status: "success", message: "Danke!" };
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      status: "error",
+      message: "Bitte melden Sie sich an, um einen Erfahrungsbericht zu schreiben.",
+      values: collectValues(formData),
+    };
+  }
 
   const result = validateReview(formData);
   if (!result.ok) {
     return {
       status: "error",
-      message: "Bitte prüfe die markierten Felder.",
+      message: "Bitte prüfen Sie die markierten Felder.",
       errors: result.errors,
       values: collectValues(formData),
     };
   }
 
-  const supabase = getSupabaseClient();
+  const supabase = await createServerSupabase();
   if (!supabase) return { ...NOT_CONFIGURED, values: collectValues(formData) };
 
-  const { error } = await supabase.from("reparaturfaelle").insert({ ...result.value, status: "pending" });
+  const { error } = await supabase
+    .from("reparaturfaelle")
+    .insert({ ...result.value, user_id: user.id, status: "verified" });
 
   if (error) {
     console.error("Bericht-Einreichung fehlgeschlagen:", error.message);
     return { ...GENERIC_ERROR, values: collectValues(formData) };
   }
+
+  updateTag("reviews");
   return {
     status: "success",
-    message:
-      "Danke für Ihren Bericht! Wir lesen ihn kurz durch und schalten ihn dann frei – meist innerhalb weniger Tage.",
+    message: "Danke für Ihren Bericht! Er ist ab sofort veröffentlicht.",
   };
+}
+
+/** „Melden“: Eine Bewertung zur Prüfung melden (nur eingeloggt). */
+export async function submitReportAction(
+  reviewId: string,
+  grund: string
+): Promise<{ ok: boolean; message: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "Bitte melden Sie sich an, um eine Bewertung zu melden." };
+  if (!reviewId || reviewId.length > 64) return { ok: false, message: "Ungültige Meldung." };
+
+  const supabase = await createServerSupabase();
+  if (!supabase) return { ok: false, message: "Melden ist gerade nicht möglich." };
+
+  const { error } = await supabase
+    .from("meldungen")
+    .insert({ review_id: reviewId, melder_id: user.id, grund: grund.slice(0, 500) });
+
+  if (error) {
+    console.error("Meldung fehlgeschlagen:", error.message);
+    return { ok: false, message: "Das hat nicht geklappt. Bitte später erneut versuchen." };
+  }
+  return { ok: true, message: "Danke – wir schauen uns die Bewertung an." };
 }

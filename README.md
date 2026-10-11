@@ -63,7 +63,11 @@ npm run build
    (eu-central-1)“ wählen** (Datenschutz).
 2. Im **SQL Editor** nacheinander ausführen:
    `supabase/migrations/0001_init.sql` → `0002_reparaturfaelle.sql` →
-   `0003_erfahrungsberichte.sql` → dann `supabase/seed.sql` und `supabase/seed-weitere.sql` (alle recherchierten Werkstätten).
+   `0003_erfahrungsberichte.sql` → `0004_accounts.sql` → dann `supabase/seed.sql` und `supabase/seed-weitere.sql` (alle recherchierten Werkstätten).
+   `0004` bringt Konten (Supabase Auth): Profile, Berichte an Konten gekoppelt +
+   automatisch veröffentlicht, Meldungen-Tabelle. Zusätzlich im Dashboard unter
+   **Authentication**: E-Mail-Provider + „Confirm email" an, **Site URL** =
+   Produktions-URL, Redirect-URL `…/**` (siehe Roadmap-Doc).
 3. Unter **Project Settings → API** kopieren: *Project URL*, *anon public key* und
    *service_role key* (letzterer ist geheim!).
 4. `.env.local` anlegen (Vorlage: `.env.example`) und alle Werte eintragen.

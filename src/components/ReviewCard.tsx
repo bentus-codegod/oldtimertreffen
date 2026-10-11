@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MeldenButton from "@/components/MeldenButton";
 import Stars from "@/components/Stars";
 import { KOSTEN, type Review } from "@/lib/types";
 
@@ -21,10 +22,13 @@ function Part({ title, text }: { title: string; text: string }) {
 export default function ReviewCard({
   review,
   workshop,
+  reportable = false,
 }: {
   review: Review;
   /** Wenn gesetzt, wird der Werkstattname verlinkt (z. B. auf der Startseite). */
   workshop?: { name: string; slug: string };
+  /** Zeigt den „Melden“-Link (auf der Werkstatt-Detailseite). */
+  reportable?: boolean;
 }) {
   const kosten = KOSTEN.find((k) => k.value === review.kosten_einordnung)?.label;
   const fahrzeug = [review.fahrzeug_marke, review.fahrzeug_modell].filter(Boolean).join(" ");
@@ -62,6 +66,11 @@ export default function ReviewCard({
           {review.autor_name || "Ein Stammtisch-Gast"}
           {formatDate(review.created_at) ? ` · ${formatDate(review.created_at)}` : ""}
         </span>
+        {reportable ? (
+          <span className="ml-auto">
+            <MeldenButton reviewId={review.id} />
+          </span>
+        ) : null}
       </footer>
     </article>
   );
