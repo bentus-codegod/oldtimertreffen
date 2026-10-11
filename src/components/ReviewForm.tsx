@@ -79,8 +79,9 @@ export default function ReviewForm({ workshopId, workshopName }: { workshopId: s
       <input type="hidden" name="workshop_id" value={workshopId} />
 
       <p className="text-base text-muted">
-        Du warst mit deinem Klassiker bei <strong className="text-fg">{workshopName}</strong>? Erzähl
-        den anderen, was los war und wie es gelaufen ist – genau solche Berichte helfen am meisten.
+        Waren Sie mit Ihrem Klassiker bei <strong className="text-fg">{workshopName}</strong>?
+        Erzählen Sie den anderen, was los war und wie es gelaufen ist – genau solche Berichte helfen
+        am meisten.
       </p>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -98,12 +99,12 @@ export default function ReviewForm({ workshopId, workshopName }: { workshopId: s
         <Field id="baujahr" label="Baujahr" hint="Optional" error={e.baujahr}>
           <input id="baujahr" name="baujahr" className="input" inputMode="numeric" maxLength={4} defaultValue={str(v.baujahr)} aria-invalid={Boolean(e.baujahr)} aria-describedby={e.baujahr ? "baujahr-error" : undefined} />
         </Field>
-        <Field id="autor_name" label="Dein Name" hint="Optional – Vorname oder Spitzname reicht." error={e.autor_name}>
+        <Field id="autor_name" label="Ihr Name" hint="Optional – Vorname oder Spitzname reicht." error={e.autor_name}>
           <input id="autor_name" name="autor_name" className="input" maxLength={40} autoComplete="given-name" defaultValue={str(v.autor_name)} aria-invalid={Boolean(e.autor_name)} aria-describedby={e.autor_name ? "autor_name-error" : undefined} />
         </Field>
       </div>
 
-      <Field id="problem_beschreibung" label="Welches Problem hattest du?" required hint="Symptome so konkret wie möglich – z. B. „springt kalt schlecht an, Leerlauf schwankt“." error={e.problem_beschreibung}>
+      <Field id="problem_beschreibung" label="Welches Problem hatten Sie?" required hint="Symptome so konkret wie möglich – z. B. „springt kalt schlecht an, Leerlauf schwankt“." error={e.problem_beschreibung}>
         <textarea id="problem_beschreibung" name="problem_beschreibung" rows={4} maxLength={1500} className="input min-h-28" defaultValue={str(v.problem_beschreibung)} aria-invalid={Boolean(e.problem_beschreibung)} aria-describedby={e.problem_beschreibung ? "problem_beschreibung-error" : undefined} />
       </Field>
 
@@ -115,10 +116,10 @@ export default function ReviewForm({ workshopId, workshopName }: { workshopId: s
         <textarea id="erfahrung" name="erfahrung" rows={4} maxLength={1500} className="input min-h-28" defaultValue={str(v.erfahrung)} aria-invalid={Boolean(e.erfahrung)} aria-describedby={e.erfahrung ? "erfahrung-error" : undefined} />
       </Field>
 
-      <Segmented legend="Deine Bewertung" name="bewertung" options={STAR_OPTIONS} selected={str(v.bewertung)} error={e.bewertung} required />
+      <Segmented legend="Ihre Bewertung" name="bewertung" options={STAR_OPTIONS} selected={str(v.bewertung)} error={e.bewertung} required />
       <Segmented legend="Die Kosten waren …" name="kosten_einordnung" options={KOSTEN} selected={str(v.kosten_einordnung)} error={e.kosten_einordnung} />
       <Segmented
-        legend="Würdest du die Werkstatt weiterempfehlen?"
+        legend="Würden Sie die Werkstatt weiterempfehlen?"
         name="wuerde_empfehlen"
         options={[
           { value: "ja", label: "Ja" },

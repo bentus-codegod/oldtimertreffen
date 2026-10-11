@@ -56,9 +56,12 @@ export async function submitWorkshopAction(_prev: FormState, formData: FormData)
   const supabase = getSupabaseClient();
   if (!supabase) return { ...NOT_CONFIGURED, values: collectValues(formData) };
 
+  const rolle = typeof formData.get("rolle") === "string" ? String(formData.get("rolle")) : "";
+  const quelle = rolle === "betreiber" ? "betreiber" : rolle === "kunde" ? "empfehlung" : "selbsteintrag";
+
   const { error } = await supabase
     .from("workshops")
-    .insert({ ...result.value, status: "pending", quelle: "selbsteintrag" });
+    .insert({ ...result.value, status: "pending", quelle });
 
   if (error) {
     console.error("Werkstatt-Einreichung fehlgeschlagen:", error.message);
@@ -67,7 +70,7 @@ export async function submitWorkshopAction(_prev: FormState, formData: FormData)
   return {
     status: "success",
     message:
-      "Danke! Dein Eintrag ist angekommen und wird jetzt von uns geprüft. Erst danach erscheint er auf der Seite.",
+      "Danke! Ihr Eintrag ist angekommen und wird jetzt von uns geprüft. Erst danach erscheint er auf der Seite.",
   };
 }
 
@@ -97,6 +100,6 @@ export async function submitReviewAction(_prev: FormState, formData: FormData): 
   return {
     status: "success",
     message:
-      "Danke für deinen Bericht! Wir lesen ihn kurz durch und schalten ihn dann frei – meist innerhalb weniger Tage.",
+      "Danke für Ihren Bericht! Wir lesen ihn kurz durch und schalten ihn dann frei – meist innerhalb weniger Tage.",
   };
 }

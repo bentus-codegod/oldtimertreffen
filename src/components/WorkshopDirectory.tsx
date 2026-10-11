@@ -24,11 +24,31 @@ export default function WorkshopDirectory({
   extraText: Record<string, string>;
 }) {
   const params = useSearchParams();
+  const paramsKey = params.toString();
+
   const [suche, setSuche] = useState(params.get("suche") ?? "");
   const [marke, setMarke] = useState(params.get("marke") ?? "");
   const [gewerk, setGewerk] = useState(params.get("gewerk") ?? "");
   const [region, setRegion] = useState(params.get("region") ?? "");
   const [sort, setSort] = useState<SortKey>("name");
+  const [syncedKey, setSyncedKey] = useState(paramsKey);
+
+  /*
+   * Die URL ist die Quelle der Wahrheit für die Vorauswahl: Jedes Mal, wenn sich
+   * die Adresse ändert – z. B. von der Startseite mit ?marke=Porsche herkommen,
+   * eine andere Marke anklicken oder ohne Parameter auf die Seite zurückkehren –
+   * werden die Filter neu aus der URL übernommen. Das behebt „immer dieselben
+   * Treffer egal welche Marke“ und „Filter bleiben beim erneuten Öffnen stehen“.
+   * Tippen/Auswählen auf dieser Seite ändert die URL nicht und bleibt erhalten.
+   * (Zustand beim Render-Wechsel anpassen – React-Muster, kein Effekt nötig.)
+   */
+  if (paramsKey !== syncedKey) {
+    setSyncedKey(paramsKey);
+    setSuche(params.get("suche") ?? "");
+    setMarke(params.get("marke") ?? "");
+    setGewerk(params.get("gewerk") ?? "");
+    setRegion(params.get("region") ?? "");
+  }
 
   const marken = useMemo(() => availableMarken(workshops), [workshops]);
   const gewerke = useMemo(() => availableGewerke(workshops), [workshops]);
@@ -43,7 +63,14 @@ export default function WorkshopDirectory({
     [workshops, suche, marke, gewerk, region, sort, extraText, summaries]
   );
 
-  const hasFilter = Boolean(suche || marke || gewerk || region);
+  const activeChips = [
+    marke ? { key: "marke", label: marke, clear: () => setMarke("") } : null,
+    gewerk ? { key: "gewerk", label: gewerk, clear: () => setGewerk("") } : null,
+    region ? { key: "region", label: region === "Hamburg" ? "Hamburg" : "Umland", clear: () => setRegion("") } : null,
+    suche ? { key: "suche", label: `„${suche}“`, clear: () => setSuche("") } : null,
+  ].filter(Boolean) as { key: string; label: string; clear: () => void }[];
+
+  const hasFilter = activeChips.length > 0;
 
   function reset() {
     setSuche("");
@@ -58,59 +85,98 @@ export default function WorkshopDirectory({
         role="search"
         aria-label="Werkstätten filtern"
         onSubmit={(event) => event.preventDefault()}
-        className="card grid gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4"
+        className="card overflow-hidden p-5 sm:p-6"
       >
-        <div className="sm:col-span-2 lg:col-span-4">
-          <label htmlFor="suche" className="label">
-            Suche
-          </label>
-          <input
-            id="suche"
-            type="search"
-            value={suche}
-            onChange={(event) => setSuche(event.target.value)}
-            placeholder="Name, Ort, Marke – oder dein Problem: „Vergaser W123“, „Elektrik Alfa“"
-            className="input"
-            autoComplete="off"
-          />
-        </div>
-        <Select id="marke" label="Marke" value={marke} onChange={setMarke} options={marken} all="Alle Marken" />
-        <Select id="gewerk" label="Leistung" value={gewerk} onChange={setGewerk} options={gewerke} all="Alle Leistungen" />
-        <Select id="region" label="Gebiet" value={region} onChange={setRegion} options={[...REGIONEN]} all="Hamburg & Umland" />
-        <div>
-          <label htmlFor="sort" className="label">
-            Sortierung
-          </label>
-          <select id="sort" value={sort} onChange={(event) => setSort(event.target.value as SortKey)} className="input">
-            {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col gap-4">
+          <div>
+            <label htmlFor="suche" className="label">
+              Suche
+            </label>
+            <div className="relative">
+              <span aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted">
+                ⌕
+              </span>
+              <input
+                id="suche"
+                type="search"
+                value={suche}
+                onChange={(event) => setSuche(event.target.value)}
+                placeholder="Name, Ort, Marke – oder Ihr Problem: „Vergaser W123“, „Elektrik Alfa“"
+                className="input h-13 pl-11"
+                autoComplete="off"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Select id="marke" label="Marke" value={marke} onChange={setMarke} options={marken} all="Alle Marken" />
+            <Select id="gewerk" label="Leistung" value={gewerk} onChange={setGewerk} options={gewerke} all="Alle Leistungen" />
+            <Select id="region" label="Gebiet" value={region} onChange={setRegion} options={[...REGIONEN]} all="Hamburg & Umland" />
+            <div>
+              <label htmlFor="sort" className="label">
+                Sortierung
+              </label>
+              <select id="sort" value={sort} onChange={(event) => setSort(event.target.value as SortKey)} className="select h-13">
+                {SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {hasFilter ? (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+              <span className="text-sm font-semibold text-muted">Aktive Filter:</span>
+              {activeChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={chip.clear}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-sm font-medium text-accent transition-colors hover:bg-accent/20"
+                >
+                  {chip.label}
+                  <span aria-hidden="true" className="text-base leading-none transition-transform group-hover:rotate-90">
+                    ×
+                  </span>
+                  <span className="sr-only">entfernen</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={reset}
+                className="ml-1 text-sm font-semibold text-muted underline-offset-4 hover:text-accent hover:underline"
+              >
+                Alle zurücksetzen
+              </button>
+            </div>
+          ) : null}
         </div>
       </form>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p role="status" aria-live="polite" className="text-base text-muted">
-          {visible.length === workshops.length
-            ? `Alle ${workshops.length} Werkstätten`
-            : `${visible.length} von ${workshops.length} Werkstätten`}
-        </p>
-        {hasFilter ? (
-          <button type="button" onClick={reset} className="btn-outline min-h-11 py-1.5">
-            Filter zurücksetzen
-          </button>
-        ) : null}
-      </div>
+      <p role="status" aria-live="polite" className="text-base text-muted">
+        {visible.length === workshops.length ? (
+          <>
+            Alle <span className="font-semibold tabular-nums text-fg">{workshops.length}</span> Werkstätten
+          </>
+        ) : (
+          <>
+            <span className="font-semibold tabular-nums text-fg">{visible.length}</span> von {workshops.length}{" "}
+            Werkstätten
+          </>
+        )}
+      </p>
 
       {visible.length > 0 ? (
-        <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {visible.map((workshop) => (
-            <li key={workshop.id} className="flex">
-              <div className="flex w-full">
-                <WorkshopCard workshop={workshop} summary={summaries[workshop.id]} />
-              </div>
+        <ul key={`${paramsKey}|${suche}|${marke}|${gewerk}|${region}|${sort}`} className="stagger grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {visible.map((workshop, i) => (
+            <li
+              key={workshop.id}
+              className="flex h-full"
+              style={{ ["--i" as string]: Math.min(i, 11) }}
+            >
+              <WorkshopCard workshop={workshop} summary={summaries[workshop.id]} />
             </li>
           ))}
         </ul>
@@ -118,8 +184,8 @@ export default function WorkshopDirectory({
         <div className="card p-8 text-center">
           <p className="font-display text-2xl font-bold">Nichts gefunden.</p>
           <p className="mx-auto mt-2 max-w-prose text-base text-muted">
-            Zu dieser Suche haben wir (noch) keine Werkstatt. Kennst du eine, die passt? Trag sie ein –
-            nach kurzer Prüfung erscheint sie hier.
+            Zu dieser Suche haben wir (noch) keine Werkstatt. Kennen Sie eine, die passt? Tragen Sie
+            sie ein – nach kurzer Prüfung erscheint sie hier.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={reset} className="btn-outline">
@@ -155,7 +221,7 @@ function Select({
       <label htmlFor={id} className="label">
         {label}
       </label>
-      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className="input">
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className="select h-13">
         <option value="">{all}</option>
         {options.map((option) => (
           <option key={option} value={option}>

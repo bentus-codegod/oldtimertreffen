@@ -1,89 +1,132 @@
 @import "tailwindcss";
 
 /*
- * Farbwelt: Garage nach Feierabend – tiefes Rennsport-Grün, Messing/Bernstein
- * als Akzent, warmes Papier als Fläche. Alle Farben sind Tokens; der Dunkelmodus
- * überschreibt nur die Werte. Kontraste sind bewusst hoch gewählt (Zielgruppe
- * 40–70, oft draußen/in der Garage am Handy).
+ * Farbwelt: „Garage am Abend“ – tiefes Rennsport-Grün als Anker, Bernstein/Orange
+ * als Akzent, eine ruhige, leicht grün getönte Fläche darunter (statt des früheren
+ * warmen Papiers). Alle Farben sind Tokens; der Dunkelmodus überschreibt nur die
+ * Werte. Kontraste sind bewusst hoch (Zielgruppe 50–75, oft draußen/am Handy).
  */
 :root {
-  --bg: #efede4;
-  --surface: #fffefa;
-  --surface-2: #e5e2d4;
-  --fg: #16201a;
-  --muted: #4d5b52;
-  --border: #c2bfae;
-  --accent: #b86a12;
-  --accent-hover: #9a560a;
+  /* Flächen – grün getöntes, etwas dunkleres „Light“ statt Creme */
+  --bg: #d7e0d3;
+  --bg-soft: #e3eadf;
+  --surface: #f4f7f0;
+  --surface-2: #cad6c4;
+  --fg: #14241b;
+  --muted: #475347;
+  --border: #b2c0ac;
+  --border-strong: #93a68c;
+
+  /* Akzent – Bernstein/Orange (wie Startseite) */
+  --accent: #b5620e;
+  --accent-hover: #984f07;
+  --accent-soft: #f0d9bd;
   --accent-fg: #ffffff;
-  --rail: #1b362a;
-  --rail-fg: #f4f1e4;
-  --rail-muted: #b7c9bd;
-  --ok: #2f6e43;
-  --warn: #a0430f;
-  --star: #c98211;
+
+  /* Dunkelgrün („Rail“) – Header, Hero, Footer */
+  --rail: #163227;
+  --rail-2: #1d3d2f;
+  --rail-fg: #f2f3e7;
+  --rail-muted: #b3c7b8;
+
+  --ok: #2c6b40;
+  --warn: #9c410d;
+  --star: #c27f10;
+
   --plate-bg: #fbfaf3;
   --plate-fg: #101410;
   --plate-eu: #1d3f94;
+
+  /* Bewegung – ruhige, „teure“ Kurven (Apple/Emil-Kowalski-Gefühl) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.22, 1.2, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --shadow-sm: 0 1px 2px rgb(20 36 27 / 0.06), 0 1px 1px rgb(20 36 27 / 0.04);
+  --shadow-md: 0 6px 20px -8px rgb(20 36 27 / 0.22), 0 2px 6px -2px rgb(20 36 27 / 0.1);
+  --shadow-lg: 0 20px 48px -16px rgb(20 36 27 / 0.3), 0 6px 16px -8px rgb(20 36 27 / 0.16);
+
+  /* Chevron für eigene Selects – Farbe pro Theme überschrieben */
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23475347' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #101b15;
+    --bg: #0f1b15;
+    --bg-soft: #142019;
     --surface: #17261f;
     --surface-2: #1d3128;
     --fg: #eef3ee;
-    --muted: #a9bcb0;
+    --muted: #a7bbad;
     --border: #2f463a;
+    --border-strong: #3c5848;
+
     --accent: #e39a3f;
     --accent-hover: #f0ad5a;
+    --accent-soft: #3a2c16;
     --accent-fg: #1c0f02;
+
     --rail: #0a130e;
+    --rail-2: #11211a;
     --rail-fg: #eef3ee;
     --rail-muted: #93a99b;
+
     --ok: #6fc184;
-    --warn: #ee9560;
+    --warn: #ef9a63;
     --star: #f0b23e;
+
     --plate-bg: #f1efe2;
     --plate-fg: #101410;
     --plate-eu: #2a52b8;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 8px 24px -10px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 24px 56px -18px rgb(0 0 0 / 0.6), 0 6px 16px -8px rgb(0 0 0 / 0.5);
+
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23a7bbad' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     color-scheme: dark;
   }
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-bg-soft: var(--bg-soft);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
   --color-accent-fg: var(--accent-fg);
   --color-rail: var(--rail);
+  --color-rail-2: var(--rail-2);
   --color-rail-fg: var(--rail-fg);
   --color-rail-muted: var(--rail-muted);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-star: var(--star);
-  --font-display: "Avenir Next Condensed", "Franklin Gothic Medium", "Arial Narrow",
-    "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  --font-display: "Oswald", "Avenir Next Condensed", "Franklin Gothic Medium",
+    "Roboto Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-/* Grundschrift etwas größer als üblich: 18 px statt 16 px. */
+/* Grundschrift etwas größer als üblich: ~18 px. */
 html {
   font-size: 112.5%;
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
   line-height: 1.6;
+  font-feature-settings: "kern", "liga", "cv11";
 }
 
 ::selection {
@@ -96,23 +139,113 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------- Bewegung ---------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scroll-/Mount-Reveal (von der <Reveal>-Komponente gesteuert). */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Gestaffeltes Einblenden von Listen (z. B. Trefferkarten). */
+.stagger > * {
+  animation: rise 0.55s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* @utility statt @layer components: nur so lässt sich "btn" in den Varianten per @apply wiederverwenden. */
+/* ---------- Bausteine ---------- */
+
+/* @utility statt @layer components: nur so lassen sich "btn"/"input" in den Varianten per @apply wiederverwenden. */
 @utility btn {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-md border px-5 py-2.5 text-base font-semibold no-underline transition-colors;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border px-5 py-2.5 text-base font-semibold no-underline;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out), box-shadow 0.25s var(--ease-out), transform 0.12s var(--ease-out);
+}
+
+@utility input {
+  @apply min-h-13 w-full rounded-xl border border-border bg-surface px-4 py-3 text-base text-fg placeholder:text-muted/70;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out);
 }
 
 @layer components {
   .btn-primary {
-    @apply btn border-accent bg-accent text-accent-fg hover:bg-accent-hover hover:border-accent-hover;
+    @apply btn border-accent bg-accent text-accent-fg shadow-sm hover:bg-accent-hover hover:border-accent-hover;
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0) scale(0.985);
+    }
   }
   .btn-outline {
-    @apply btn border-border bg-surface text-fg hover:border-accent hover:text-accent;
+    @apply btn border-border-strong bg-surface text-fg hover:border-accent hover:text-accent;
+    &:hover {
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0) scale(0.985);
+    }
   }
   .btn-rail {
     @apply btn border-rail-fg/40 bg-transparent text-rail-fg hover:bg-rail-fg/10;
@@ -123,17 +256,29 @@ body {
   .hint {
     @apply mt-1 text-sm text-muted;
   }
-  .input {
-    @apply min-h-12 w-full rounded-md border border-border bg-surface px-3.5 py-2.5 text-base text-fg placeholder:text-muted/70;
+  .input:hover {
+    border-color: var(--border-strong);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  /* Eigene Selects: native Pfeile aus, einheitliche Höhe/Optik wie .input. */
+  .select {
+    @apply input cursor-pointer appearance-none bg-no-repeat pr-11;
+    background-image: var(--chevron);
+    background-position: right 0.85rem center;
+    background-size: 1.25rem;
   }
   .error-text {
     @apply mt-1.5 text-sm font-medium text-warn;
   }
   .chip {
-    @apply inline-flex items-center rounded-full bg-surface-2 px-3 py-1 text-sm font-medium text-fg;
+    @apply inline-flex items-center rounded-full border border-border bg-surface-2 px-3 py-1 text-sm font-medium text-fg;
   }
   .card {
-    @apply rounded-lg border border-border bg-surface;
+    @apply rounded-2xl border border-border bg-surface shadow-sm;
   }
   .kicker {
     @apply font-mono text-xs font-semibold uppercase tracking-[0.18em];

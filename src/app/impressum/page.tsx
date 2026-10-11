@@ -46,8 +46,8 @@ export default function ImpressumPage() {
             <p className="mt-2">
               Erfahrungsberichte und Werkstatteinträge stammen von Nutzern und geben deren Meinung
               und Wissen wieder. Sie werden vor der Veröffentlichung gesichtet, aber nicht auf jede
-              Einzelangabe hin überprüft. Wenn du einen Fehler oder einen rechtsverletzenden Inhalt
-              entdeckst, schreib uns bitte – wir prüfen den Hinweis zeitnah.
+              Einzelangabe hin überprüft. Wenn Sie einen Fehler oder einen rechtsverletzenden Inhalt
+              entdecken, schreiben Sie uns bitte – wir prüfen den Hinweis zeitnah.
             </p>
           </section>
         </div>

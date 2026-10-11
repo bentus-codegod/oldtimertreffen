@@ -17,12 +17,12 @@ export default function WorkshopCard({
   const hasReviews = Boolean(summary && summary.count > 0);
 
   return (
-    <article className="card group relative flex flex-col gap-3 p-5 transition-shadow hover:shadow-md focus-within:shadow-md">
+    <article className="card group relative flex h-full w-full flex-col gap-3 p-5 transition-[transform,box-shadow,border-color] duration-300 ease-[var(--ease-out)] hover:-translate-y-1 hover:border-accent/50 hover:shadow-[var(--shadow-md)] focus-within:shadow-[var(--shadow-md)]">
       <div>
         <h3 className="font-display text-2xl font-bold leading-tight">
           <Link
             href={`/werkstatt/${workshop.slug}`}
-            className="text-fg no-underline after:absolute after:inset-0 after:content-[''] group-hover:text-accent"
+            className="text-fg no-underline transition-colors after:absolute after:inset-0 after:content-[''] group-hover:text-accent"
           >
             {workshop.name}
           </Link>
@@ -38,16 +38,16 @@ export default function WorkshopCard({
             {m}
           </li>
         ))}
-        {moreMarken > 0 ? <li className="chip">+{moreMarken}</li> : null}
+        {moreMarken > 0 ? <li className="chip border-accent/30 bg-accent/10 text-accent">+{moreMarken}</li> : null}
       </ul>
 
-      <p className="text-base">
+      <p className="line-clamp-2 text-base text-fg/90">
         <span className="sr-only">Leistungen: </span>
         {workshop.gewerke.join(" · ")}
       </p>
 
       {workshop.hinweis ? (
-        <p className="rounded-md bg-warn/10 px-3 py-2 text-sm text-warn">{workshop.hinweis}</p>
+        <p className="line-clamp-2 rounded-lg bg-warn/10 px-3 py-2 text-sm text-warn">{workshop.hinweis}</p>
       ) : null}
 
       <p className="mt-auto flex items-center gap-2 pt-1 text-base">

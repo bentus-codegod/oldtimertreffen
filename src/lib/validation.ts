@@ -63,8 +63,24 @@ export function validateWorkshop(form: FormLike): Validation<NewWorkshopInput> {
   const telefon = clean(form.get("telefon"));
   const websiteRaw = clean(form.get("website"));
   const hinweis = clean(form.get("hinweis"), true);
-  const marken = pickAllowed(form.getAll("marken"), MARKEN);
+  const markenChecked = pickAllowed(form.getAll("marken"), MARKEN);
   const gewerke = pickAllowed(form.getAll("gewerke"), GEWERKE);
+
+  // Freitext „Sonstige Marke(n)“: kommagetrennt, je 2–40 Zeichen, sinnvolle Zeichen.
+  const SONSTIGE_RE = /^[\p{L}0-9 .&/-]{2,40}$/u;
+  const sonstigeRaw = clean(form.get("marken_sonstige"));
+  const sonstige = sonstigeRaw
+    ? sonstigeRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 10)
+    : [];
+  if (sonstige.some((s) => !SONSTIGE_RE.test(s))) {
+    errors.marken_sonstige = "Bitte nur Markennamen, durch Komma getrennt (je 2–40 Zeichen).";
+  }
+  // Checkbox-Marken und Freitext zusammenführen (ohne Dubletten).
+  const marken = [...new Set([...markenChecked, ...sonstige])];
 
   if (!between(name, 2, 120)) errors.name = "Bitte den Namen der Werkstatt angeben (2–120 Zeichen).";
   if (!between(strasse, 3, 120)) errors.strasse = "Bitte Straße und Hausnummer angeben.";
@@ -73,7 +89,7 @@ export function validateWorkshop(form: FormLike): Validation<NewWorkshopInput> {
   if (telefon && !PHONE.test(telefon)) errors.telefon = "Die Telefonnummer sieht ungewöhnlich aus.";
   const website = normalizeWebsite(websiteRaw);
   if (website === null) errors.website = "Die Internetadresse sieht ungültig aus (z. B. meine-werkstatt.de).";
-  if (marken.length === 0) errors.marken = "Bitte mindestens eine Marke auswählen.";
+  if (marken.length === 0) errors.marken = "Bitte mindestens eine Marke auswählen oder eintragen.";
   if (gewerke.length === 0) errors.gewerke = "Bitte mindestens ein Gewerk auswählen.";
   if (hinweis.length > 500) errors.hinweis = "Bitte höchstens 500 Zeichen.";
   if (form.get("bestaetigung") !== "on") {
@@ -134,10 +150,10 @@ export function validateReview(
   const kostenValues: readonly string[] = KOSTEN.map((k) => k.value);
   if (kostenRaw && !kostenValues.includes(kostenRaw)) errors.kosten_einordnung = "Ungültige Auswahl.";
   if (empfehlenRaw !== "ja" && empfehlenRaw !== "nein") {
-    errors.wuerde_empfehlen = "Bitte angeben, ob du die Werkstatt weiterempfehlen würdest.";
+    errors.wuerde_empfehlen = "Bitte angeben, ob Sie die Werkstatt weiterempfehlen würden.";
   }
   if (form.get("bestaetigung") !== "on") {
-    errors.bestaetigung = "Bitte bestätigen, dass du selbst Kunde der Werkstatt warst.";
+    errors.bestaetigung = "Bitte bestätigen, dass Sie selbst Kundin oder Kunde der Werkstatt waren.";
   }
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };

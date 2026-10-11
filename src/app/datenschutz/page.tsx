@@ -68,27 +68,27 @@ export default function DatenschutzPage() {
 
         <Section title="Werkstatt eintragen und Erfahrungsbericht schreiben">
           <p>
-            Wenn du eine Werkstatt einträgst oder einen Erfahrungsbericht abschickst, speichern wir
-            deine Angaben (bei Werkstätten: Name, Adresse, Kontaktdaten, Marken und Leistungen; bei
+            Wenn Sie eine Werkstatt eintragen oder einen Erfahrungsbericht abschicken, speichern wir
+            Ihre Angaben (bei Werkstätten: Name, Adresse, Kontaktdaten, Marken und Leistungen; bei
             Berichten: Fahrzeug, Schilderung, Bewertung und – freiwillig – einen Namen oder
-            Spitznamen) in unserer Datenbank bei Supabase. Rechtsgrundlage ist deine Einwilligung
+            Spitznamen) in unserer Datenbank bei Supabase. Rechtsgrundlage ist Ihre Einwilligung
             durch Absenden des Formulars (Art. 6 Abs. 1 lit. a DSGVO).
           </p>
           <p>
             Alle Einsendungen sind zunächst nicht öffentlich und werden von uns geprüft. Erst nach
-            der Freigabe erscheinen sie auf der Seite. Bitte gib in Berichten keine
+            der Freigabe erscheinen sie auf der Seite. Bitte geben Sie in Berichten keine
             personenbezogenen Daten Dritter an, etwa Kennzeichen oder Namen von Mitarbeitern.
           </p>
           <p>
-            Du kannst jederzeit verlangen, dass dein Eintrag oder Bericht geändert oder gelöscht wird
-            – schreib uns dazu eine E-Mail.
+            Sie können jederzeit verlangen, dass Ihr Eintrag oder Bericht geändert oder gelöscht wird
+            – schreiben Sie uns dazu eine E-Mail.
           </p>
         </Section>
 
-        <Section title="Deine Rechte">
+        <Section title="Ihre Rechte">
           <p>
-            Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
-            Datenübertragbarkeit und Widerspruch sowie das Recht, dich bei einer
+            Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
+            Datenübertragbarkeit und Widerspruch sowie das Recht, sich bei einer
             Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist in Hamburg der Hamburgische
             Beauftragte für Datenschutz und Informationsfreiheit.
           </p>

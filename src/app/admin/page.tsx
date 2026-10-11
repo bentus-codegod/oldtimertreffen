@@ -34,8 +34,8 @@ async function AdminGate() {
       <div className="card mt-6 p-6 text-base">
         <p className="font-semibold">Der Prüfbereich ist noch nicht eingerichtet.</p>
         <p className="mt-2 text-muted">
-          Setze in Vercel (und lokal in .env.local) die Variablen ADMIN_PASSWORD,
-          ADMIN_SESSION_SECRET und SUPABASE_SERVICE_ROLE_KEY – siehe README. Bis dahin kannst du
+          Setzen Sie in Vercel (und lokal in .env.local) die Variablen ADMIN_PASSWORD,
+          ADMIN_SESSION_SECRET und SUPABASE_SERVICE_ROLE_KEY – siehe README. Bis dahin können Sie
           Einträge auch direkt im Supabase Table Editor freigeben (status auf „verified“ setzen).
         </p>
       </div>

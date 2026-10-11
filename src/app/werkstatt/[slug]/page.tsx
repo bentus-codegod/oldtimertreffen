@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactActions from "@/components/ContactActions";
+import Reveal from "@/components/Reveal";
 import ReviewCard from "@/components/ReviewCard";
 import ReviewForm from "@/components/ReviewForm";
 import Stars from "@/components/Stars";
@@ -75,7 +76,7 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
       </header>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <section className="card p-6" aria-labelledby="marken-h">
+        <Reveal as="section" className="card p-6" aria-labelledby="marken-h">
           <h2 id="marken-h" className="font-display text-2xl font-bold uppercase tracking-wide">
             Marken
           </h2>
@@ -86,8 +87,8 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
               </li>
             ))}
           </ul>
-        </section>
-        <section className="card p-6" aria-labelledby="leistungen-h">
+        </Reveal>
+        <Reveal as="section" delay={100} className="card p-6" aria-labelledby="leistungen-h">
           <h2 id="leistungen-h" className="font-display text-2xl font-bold uppercase tracking-wide">
             Leistungen
           </h2>
@@ -98,7 +99,7 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
               </li>
             ))}
           </ul>
-        </section>
+        </Reveal>
       </div>
 
       <section className="mt-10" aria-labelledby="berichte-h" id="berichte">
@@ -115,7 +116,7 @@ export default async function WerkstattPage({ params }: PageProps<"/werkstatt/[s
 
       <section className="mt-12 scroll-mt-6" aria-labelledby="schreiben-h" id="bericht-schreiben">
         <h2 id="schreiben-h" className="font-display text-3xl font-bold uppercase tracking-wide">
-          Deine Erfahrung teilen
+          Ihre Erfahrung teilen
         </h2>
         <div className="mt-4 max-w-3xl">
           <ReviewForm workshopId={workshop.id} workshopName={workshop.name} />
@@ -136,8 +137,8 @@ function ReviewsList({ reviews }: { reviews: Review[] }) {
     return (
       <div className="card mt-5 p-6">
         <p className="max-w-2xl text-lg">
-          Zu dieser Werkstatt gibt es noch keinen Bericht. Warst du schon mal mit deinem Klassiker
-          hier? Dann hilf den anderen mit deiner Erfahrung.
+          Zu dieser Werkstatt gibt es noch keinen Bericht. Waren Sie schon mal mit Ihrem Klassiker
+          hier? Dann helfen Sie den anderen mit Ihrer Erfahrung.
         </p>
       </div>
     );
