@@ -61,9 +61,13 @@ async function AuthNav() {
 
   return (
     <li className="flex items-center gap-3">
-      <span className="hidden max-w-[12rem] truncate text-sm text-rail-muted sm:inline" title={user.email}>
+      <Link
+        href="/konto"
+        className="hidden max-w-[12rem] truncate text-sm font-semibold text-rail-muted no-underline transition-colors hover:text-accent sm:inline"
+        title={`${user.email} – Mein Konto`}
+      >
         {user.email}
-      </span>
+      </Link>
       <form action={signOutAction}>
         <button type="submit" className="btn-rail min-h-10 px-4 py-1.5 text-base">
           Abmelden

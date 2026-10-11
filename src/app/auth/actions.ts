@@ -2,7 +2,10 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabaseAdmin";
+import { getCurrentUser } from "@/lib/auth";
 import { isDisposableEmail } from "@/lib/disposable-domains";
 import { clean } from "@/lib/validation";
 
@@ -111,4 +114,80 @@ export async function signOutAction(): Promise<void> {
   const supabase = await createServerSupabase();
   if (supabase) await supabase.auth.signOut();
   redirect("/");
+}
+
+/** „Passwort vergessen": Reset-Link per E-Mail anfordern. */
+export async function requestPasswordResetAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const email = clean(formData.get("email")).toLowerCase();
+  if (!EMAIL_RE.test(email)) {
+    return { status: "error", message: "Bitte eine gültige E-Mail-Adresse angeben.", values: { email } };
+  }
+
+  const supabase = await createServerSupabase();
+  // Immer dieselbe Erfolgsmeldung – verrät nicht, ob die Adresse existiert.
+  if (supabase) {
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${await siteOrigin()}/auth/callback?next=/passwort-neu`,
+    });
+  }
+  return {
+    status: "success",
+    message:
+      "Falls ein Konto zu dieser Adresse existiert, haben wir Ihnen einen Link zum Zurücksetzen geschickt. Bitte prüfen Sie Ihr Postfach (ggf. Spam).",
+    values: { email },
+  };
+}
+
+/** Neues Passwort setzen (nach Klick auf den Reset-Link, mit gültiger Session). */
+export async function updatePasswordAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const password = typeof formData.get("password") === "string" ? (formData.get("password") as string) : "";
+  if (password.length < 8) return { status: "error", message: "Das Passwort muss mindestens 8 Zeichen lang sein." };
+  if (password.length > 72) return { status: "error", message: "Das Passwort darf höchstens 72 Zeichen lang sein." };
+
+  const supabase = await createServerSupabase();
+  if (!supabase) return NOT_CONFIGURED;
+
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) {
+    return {
+      status: "error",
+      message: "Der Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    return { status: "error", message: "Das hat nicht geklappt. Bitte versuchen Sie es erneut." };
+  }
+
+  redirect("/konto?pw=geaendert");
+}
+
+/** Konto und eigene Berichte endgültig löschen (DSGVO). */
+export async function deleteAccountAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/anmelden");
+
+  if (formData.get("bestaetigung") !== "on") {
+    return { status: "error", message: "Bitte bestätigen Sie, dass Sie das Konto wirklich löschen möchten." };
+  }
+
+  const admin = getAdminClient();
+  if (!admin) {
+    return { status: "error", message: "Löschen ist gerade nicht möglich. Bitte später erneut versuchen." };
+  }
+
+  // Erst die personenbezogenen Inhalte, dann das Konto (Profil hängt per Cascade dran).
+  await admin.from("reparaturfaelle").delete().eq("user_id", user.id);
+  await admin.from("meldungen").delete().eq("melder_id", user.id);
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) {
+    console.error("Konto-Löschung fehlgeschlagen:", error.message);
+    return { status: "error", message: "Das hat nicht geklappt. Bitte später erneut versuchen." };
+  }
+
+  const supabase = await createServerSupabase();
+  if (supabase) await supabase.auth.signOut();
+  updateTag("reviews");
+  redirect("/anmelden?geloescht=1");
 }

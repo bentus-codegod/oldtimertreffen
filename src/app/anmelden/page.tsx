@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import AuthForm from "@/components/AuthForm";
 import Reveal from "@/components/Reveal";
@@ -22,6 +23,7 @@ export default async function AnmeldenPage({ searchParams }: PageProps<"/anmelde
 
   const sp = await searchParams;
   const fehler = typeof sp.fehler === "string" ? sp.fehler : undefined;
+  const geloescht = sp.geloescht === "1";
   const nextRaw = typeof sp.next === "string" ? sp.next : undefined;
   const nextPath = nextRaw && nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : undefined;
 
@@ -40,9 +42,19 @@ export default async function AnmeldenPage({ searchParams }: PageProps<"/anmelde
           />
         </div>
       ) : null}
+      {geloescht ? (
+        <div className="mb-4">
+          <FormMessage status="success" message="Ihr Konto wurde gelöscht. Danke, dass Sie dabei waren." />
+        </div>
+      ) : null}
       <Reveal delay={100}>
         <AuthForm mode="signin" action={signInAction} nextPath={nextPath} />
       </Reveal>
+      <p className="mt-4 text-sm text-muted">
+        <Link href="/passwort-vergessen" className="font-semibold text-accent">
+          Passwort vergessen?
+        </Link>
+      </p>
     </div>
   );
 }
