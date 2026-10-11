@@ -8,7 +8,9 @@
 --   - Hallier Classic Cars, Eberhard Thiesen, M&M Manufaktur, Zukowsky Classic Cars:
 --     nur als Händler bestätigt, Werkstatt-/Reparaturservice nicht verifiziert.
 
-insert into public.workshops (name, strasse, plz, ort, telefon, website, marken, gewerke, status, quelle) values
+insert into public.workshops (name, strasse, plz, ort, telefon, website, marken, gewerke, status, quelle)
+select name, strasse, plz, ort, telefon, website, marken::text[], gewerke::text[], status, quelle
+from (values
 ('Mirbach & Seemann GmbH', 'Osterbrooksweg 62', '22869', 'Schenefeld', '040 55503839', 'mirbach-seemann.de', '{"Mercedes-Benz"}', '{"Karosserie","Lackierung","Motor","Sattlerei / Interieur","Restaurierung komplett"}', 'verified', 'recherche'),
 ('CarMania GmbH', 'Maimoorweg 60a', '22179', 'Hamburg', '', '', '{"US-Cars","Mercedes-Benz","Jaguar / Britisch"}', '{"Restaurierung komplett","Ersatzteile / Zubehör","Karosserie"}', 'verified', 'recherche'),
 ('Route 66 Borrmann Motors KG', 'Kieler Straße 271', '22525', 'Hamburg', '040 541095', 'route66-hh.de', '{"US-Cars"}', '{"Karosserie","Elektrik","Sattlerei / Interieur","Motor"}', 'verified', 'recherche'),
@@ -26,4 +28,5 @@ insert into public.workshops (name, strasse, plz, ort, telefon, website, marken,
 ('Eberhard Thiesen GmbH & Co. KG', 'Tarpen 40, Halle 12', '22419', 'Hamburg (Langenhorn)', '040 99998 6800', 'eberhard-thiesen.de', '{"Porsche"}', '{"Ersatzteile / Zubehör","Handel"}', 'verified', 'recherche'),
 ('M&M Manufaktur und Motor – Classic Garage', 'Am Hehsel 40', '22339', 'Hamburg', '040 46657036', '', '{"Alle Marken"}', '{"Restaurierung komplett"}', 'verified', 'recherche'),
 ('Zukowsky Classic Cars GmbH', 'Süntelstraße 20a', '22457', 'Hamburg (Schnelsen)', '040 387605', '', '{"Alle Marken"}', '{"Handel"}', 'verified', 'recherche')
-on conflict do nothing;
+) as v(name, strasse, plz, ort, telefon, website, marken, gewerke, status, quelle)
+where not exists (select 1 from public.workshops w where w.name = v.name);

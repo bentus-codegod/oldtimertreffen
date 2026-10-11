@@ -2,7 +2,8 @@
 -- Nach seed.sql ausführen. Mehrfaches Ausführen ist unschädlich (doppelte Namen werden übersprungen).
 
 insert into public.workshops (name, strasse, plz, ort, telefon, website, marken, gewerke, hinweis, status, quelle)
-select * from (values
+select name, strasse, plz, ort, telefon, website, marken::text[], gewerke::text[], hinweis, status, quelle
+from (values
 ('Gasparatos Automobile GmbH', 'Osdorfer Landstraße 184', '22549', 'Hamburg', '040 8008281', 'gasparatos.de', '{"US-Cars","Alle Marken"}', '{"Wartung / Reparatur","Restaurierung komplett","Gutachten / HU"}', '', 'verified', 'recherche'),
 ('Oldtimer Service Harald Vollmer', 'Schusterring 15b', '25355', 'Barmstedt', '04123 9296933', 'vollmer-oldtimer.de', '{"Mercedes-Benz"}', '{"Restaurierung komplett","Karosserie","Wartung / Reparatur"}', '', 'verified', 'recherche'),
 ('Frank Mundt Automobiltechnik', 'Carl-von-Ossietzky-Weg 5', '21684', 'Stade', '04141 405994', 'mundt-mercedes-oldtimer.de', '{"Mercedes-Benz"}', '{"Restaurierung komplett","Motor","Wartung / Reparatur"}', '', 'verified', 'recherche'),
